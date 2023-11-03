@@ -239,6 +239,8 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                               filteredProductsList[index]
                                   .canvasPoints
                                   .toString());
+                          // final product =
+                          //     filteredProductsList.reversed.toList()[index];
                           return Column(
                             children: [
                               Card(
@@ -256,32 +258,47 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Container(
-                                        alignment: Alignment.center,
-                                        width:
-                                            60, // Adjust the width as needed.
-                                        height:
-                                            60, // Adjust the height as needed.
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              30), // Half of the width and height to make it round.
-                                          border: Border.all(
-                                            color: AppColors.textGreyColor,
-                                            width:
-                                                2.0, // Adjust the border width as needed.
+                                      GestureDetector(
+                                        onTap: () {
+                                          print("Enter into container");
+                                          imagePrviewDialoge(
+                                              imagePrviewDialoge, image);
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width:
+                                              60, // Adjust the width as needed.
+                                          height:
+                                              60, // Adjust the height as needed.
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                                30), // Half of the width and height to make it round.
+                                            border: Border.all(
+                                              color: AppColors.textGreyColor,
+                                              width:
+                                                  2.0, // Adjust the border width as needed.
+                                            ),
                                           ),
-                                        ),
-                                        child: Center(
-                                          child: DrawingImage(
-                                            imageFuture:
-                                                convertImageToUint8List(image),
-                                            // drawingPoints: drawingPoints,
-                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              print("Enter into container");
+                                              imagePrviewDialoge(
+                                                  _scaffoldKey, image);
+                                            },
+                                            child: Center(
+                                              child: DrawingImage(
+                                                imageFuture:
+                                                    convertImageToUint8List(
+                                                        image),
+                                                // drawingPoints: drawingPoints,
+                                              ),
 
-                                          //     Text(
-                                          //   "Measurements\n     Details",
-                                          //   style: TextStyle(fontSize: 6),
-                                          // ),
+                                              //     Text(
+                                              //   "Measurements\n     Details",
+                                              //   style: TextStyle(fontSize: 6),
+                                              // ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       SizedBox(
@@ -506,6 +523,34 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
           ),
         ),
       ),
+    );
+  }
+
+//Show Image Preview
+  Future<void> imagePrviewDialoge(_scaffoldKey, image) async {
+    return showDialog(
+      context: _scaffoldKey.currentContext,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            height: 300,
+            width: 350,
+            margin: const EdgeInsets.symmetric(
+              horizontal: 30,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Center(
+              child: DrawingImage(
+                imageFuture: convertImageToUint8List(image),
+                // drawingPoints: drawingPoints,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
