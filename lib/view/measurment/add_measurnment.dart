@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:measurment_app/controller/measurment_controller.dart';
 import 'package:measurment_app/res/constant/colors.dart';
 import 'package:measurment_app/utils/fading_circular_indicator.dart';
-import 'package:measurment_app/view/drawing_room/model/drawing_point.dart';
+
 import 'package:provider/provider.dart';
 
 class AddMeasurnment extends StatefulWidget {
@@ -176,41 +176,6 @@ class _AddMeasurnmentState extends State<AddMeasurnment> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Card(
-                          //   elevation: 4,
-                          //   child: Container(
-                          //     height: 55,
-                          //     decoration: BoxDecoration(
-                          //       color: AppColors.whitedColor,
-                          //       borderRadius: BorderRadius.circular(
-                          //         6,
-                          //       ),
-                          //     ),
-                          //     child: Row(
-                          //       children: [
-                          //         Expanded(
-                          //           child: TextField(
-                          //             cursorColor: AppColors.primaryColor,
-                          //             style: const TextStyle(
-                          //                 color: AppColors.whitedColor),
-                          //             decoration: const InputDecoration(
-                          //               hintText: 'Search',
-                          //               border: InputBorder.none,
-                          //               hintStyle: TextStyle(
-                          //                 color: AppColors.textGreyColor,
-                          //                 fontSize: 14,
-                          //               ),
-                          //               labelStyle: TextStyle(
-                          //                   color: AppColors.whitedColor),
-                          //               contentPadding: EdgeInsets.all(12),
-                          //             ),
-                          //             onChanged: (value) {},
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
                           ListView.builder(
                               shrinkWrap: true,
                               itemCount: category.length,
@@ -349,74 +314,152 @@ class _AddMeasurnmentState extends State<AddMeasurnment> {
                 ),
                 Consumer<MeasurementController>(
                   builder: (context, controller, child) {
-                    return InkWell(
-                      onTap: () {
-                        if (productController.text.isNotEmpty) {
-                          productName = "";
-                          productName = productController.text;
-                        } else {}
-                        if (productName == "Product Name") {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text("Product Name Required"),
-                              backgroundColor: Colors.red.shade400,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
-                        } else if (productName == "Product Name" &&
-                            productController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text("Product Name Required"),
-                              backgroundColor: Colors.red.shade400,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
-                        } else if (descriptionController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text("Description Required"),
-                              backgroundColor: Colors.red.shade400,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
-                        } else {
-                          controller.saveDrawing(
-                            // widget.drawingData,
-                            widget.drawingData,
-                            descriptionController.text,
-                            productName.toLowerCase().toString(),
-                            context,
-                          );
-                        }
-                      },
-                      child: controller.isLoading
-                          ? const SpinKitFadingCircle(
-                              color: AppColors.primaryColor,
-                            )
-                          : Container(
-                              alignment: Alignment.center,
-                              height: height * 0.07,
-                              width: width * 0.6,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryColor,
-                                borderRadius: BorderRadius.circular(
-                                  6,
+                    return Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            if (productController.text.isNotEmpty) {
+                              productName = "";
+                              productName = productController.text;
+                            } else {}
+                            if (productName == "Product Name") {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Product Name Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
                                 ),
-                              ),
-                              child: const FittedBox(
-                                child: Text(
-                                  "Save",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.whitedColor,
-                                      fontWeight: FontWeight.w600),
+                              );
+                            } else if (productName == "Product Name" &&
+                                productController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Product Name Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
                                 ),
-                              ),
-                            ),
+                              );
+                            } else if (descriptionController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Description Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            } else {
+                              controller.saveDrawing(
+                                // widget.drawingData,
+                                widget.drawingData,
+                                descriptionController.text,
+                                productName.toLowerCase().toString(),
+                                context,
+                              );
+                              // setState(() {});
+                            }
+                          },
+                          child: controller.isLoading
+                              ? const SpinKitFadingCircle(
+                                  color: AppColors.primaryColor,
+                                )
+                              : Container(
+                                  alignment: Alignment.center,
+                                  height: height * 0.07,
+                                  width: width * 0.6,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryColor,
+                                    borderRadius: BorderRadius.circular(
+                                      6,
+                                    ),
+                                  ),
+                                  child: const FittedBox(
+                                    child: Text(
+                                      "Save",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: AppColors.whitedColor,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            if (productController.text.isNotEmpty) {
+                              productName = "";
+                              productName = productController.text;
+                            } else {}
+                            if (productName == "Product Name") {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Product Name Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            } else if (productName == "Product Name" &&
+                                productController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Product Name Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            } else if (descriptionController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text("Description Required"),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            } else {
+                              controller.saveAndAddNewMeasurnment(
+                                // widget.drawingData,
+                                widget.drawingData,
+                                descriptionController.text,
+                                productName.toLowerCase().toString(),
+                                context,
+                              );
+                              // setState(() {});
+                            }
+                          },
+                          child: controller.isLoadingSaveNew
+                              ? const SpinKitFadingCircle(
+                                  color: AppColors.primaryColor,
+                                )
+                              : Container(
+                                  alignment: Alignment.center,
+                                  height: height * 0.07,
+                                  width: width * 0.6,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryColor,
+                                    borderRadius: BorderRadius.circular(
+                                      6,
+                                    ),
+                                  ),
+                                  child: const FittedBox(
+                                    child: Text(
+                                      "Save and New Measurement",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: AppColors.whitedColor,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ],
                     );
                   },
                 ),

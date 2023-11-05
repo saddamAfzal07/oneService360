@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:measurment_app/controller/measurment_controller.dart';
 import 'package:measurment_app/view/splash_screen/splash_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const MyApp());
 }
 

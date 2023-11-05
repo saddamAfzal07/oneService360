@@ -28,6 +28,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
 import 'package:flutter_drawing_board/paint_contents.dart';
 import 'package:flutter_drawing_board/paint_extension.dart';
+import 'package:image/image.dart' as img;
 
 class MeasurementScreen extends StatefulWidget {
   const MeasurementScreen({super.key});
@@ -259,14 +260,14 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                         shrinkWrap: true,
                         itemCount: filteredProductsList.length,
                         itemBuilder: (context, index) {
-                          final List<Map<String, dynamic>> drawingData =
-                              (jsonDecode(filteredProductsList[index]
-                                      .canvasPoints
-                                      .toString()) as List<dynamic>)
-                                  .map((element) =>
-                                      element as Map<String, dynamic>)
-                                  .toList();
-                          log("List Data==>${drawingData}");
+                          // final List<Map<String, dynamic>> drawingData =
+                          //     (jsonDecode(filteredProductsList[index]
+                          //             .canvasPoints
+                          //             .toString()) as List<dynamic>)
+                          //         .map((element) =>
+                          //             element as Map<String, dynamic>)
+                          //         .toList();
+                          // log("List Data==>${drawingData}");
                           // List<DrawingPoint> drawingPoints =
                           //     convertOffsetsToDrawingPoints(
                           //   parsePointsString(
@@ -300,90 +301,44 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                   child: Row(
                                     children: [
                                       GestureDetector(
-                                        onTap: () {
-                                          // print("Enter into container");
-                                          // imagePrviewDialoge(
-                                          //     imagePrviewDialoge, image);
-                                        },
+                                        onTap: () {},
                                         child: Container(
                                           alignment: Alignment.center,
-                                          width:
-                                              60, // Adjust the width as needed.
-                                          height:
-                                              60, // Adjust the height as needed.
+                                          width: 60,
+                                          height: 60,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                                30), // Half of the width and height to make it round.
+                                            borderRadius:
+                                                BorderRadius.circular(30),
                                             border: Border.all(
                                               color: AppColors.textGreyColor,
-                                              width:
-                                                  2.0, // Adjust the border width as needed.
+                                              width: 2.0,
                                             ),
                                           ),
                                           child: InkWell(
                                             onTap: () {
-                                              // final dynamic canvasPoints =
-                                              //     filteredProductsList[index]
-                                              //         .canvasPoints;
-                                              // if (canvasPoints != null) {
-                                              //   final List<Map<String, dynamic>>
-                                              //       drawingData = (jsonDecode(
-                                              //                   canvasPoints
-                                              //                       .toString())
-                                              //               as List<dynamic>)
-                                              //           .map((element) =>
-                                              //               element as Map<
-                                              //                   String,
-                                              //                   dynamic>)
-                                              //           .toList();
-                                              //   log("${drawingData}");
+                                              final List<Map<String, dynamic>>
+                                                  drawingData = (jsonDecode(
+                                                              filteredProductsList[
+                                                                      index]
+                                                                  .canvasPoints
+                                                                  .toString())
+                                                          as List<dynamic>)
+                                                      .map((element) => element
+                                                          as Map<String,
+                                                              dynamic>)
+                                                      .toList();
+                                              log("List Data==>${drawingData}");
 
-                                              //   // Continue with the rest of your code
-                                              //   List<Map<String, dynamic>>
-                                              //       jsonData = drawingData;
-                                              //   List<PaintContent>
-                                              //       eraserContents = [];
+                                              ///show image
+                                              List<Map<String, dynamic>>
+                                                  simplifiedDrawingData =
+                                                  drawingData.where((data) {
+                                                return data['type'] ==
+                                                    'SimpleLine';
+                                              }).toList();
 
-                                              //   jsonData.forEach((data) {
-                                              //     eraserContents.add(
-                                              //         Eraser.fromJson(data));
-                                              //     _drawingController
-                                              //         .addContents(
-                                              //             eraserContents);
-                                              //   });
-                                              //   // _getImageData();
-                                              // } else {
-                                              //   // Handle the case where canvasPoints is null
-                                              //   print('canvasPoints is null');
-                                              // }
-
-                                              // final List<Map<String, dynamic>>
-                                              //     drawingData = (jsonDecode(
-                                              //                 filteredProductsList[
-                                              //                         index]
-                                              //                     .canvasPoints
-                                              //                     .toString())
-                                              //             as List<dynamic>)
-                                              //         .map((element) => element
-                                              //             as Map<String,
-                                              //                 dynamic>)
-                                              //         .toList();
-                                              // log("${drawingData}");
-                                              // List<Map<String, dynamic>>
-                                              //     jsonData = drawingData;
-                                              // List<PaintContent>
-                                              //     eraserContents = [];
-
-                                              // jsonData.forEach((data) {
-                                              //   eraserContents
-                                              //       .add(Eraser.fromJson(data));
-                                              //   _drawingController.addContents(
-                                              //       eraserContents);
-                                              // });
-                                              // _getImageData();
-
-                                              imagePrviewDialoge(
-                                                  _scaffoldKey, drawingData);
+                                              imagePreviewDialog(
+                                                  simplifiedDrawingData);
                                             },
                                             child: const Center(
                                               child:
@@ -492,29 +447,9 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                         children: [
                                           InkWell(
                                             onTap: () async {
-                                              // List<Offset> points =
-                                              //     await parsePointsString(
-                                              //   filteredProductsList[index]
-                                              //       .canvasPoints
-                                              //       .toString(),
-                                              // );
-                                              // print("Off sets===>>${points}");
-                                              // Color color =
-                                              //     const Color(0xFF000000);
-                                              // double width = 5.0;
-                                              // List<DrawingPoint> drawingPoints =
-                                              //     await convertOffsetsToDrawingPoints(
-                                              //         points, color, width);
-                                              // ignore: use_build_context_synchronously
-
-                                              // log(
-                                              //   jsonDecode(
-                                              //       filteredProductsList[index]
-                                              //           .canvasPoints
-                                              //           .toString()),
-                                              // );
                                               final List<Map<String, dynamic>>
-                                                  drawingData = (jsonDecode(
+                                                  drawingData =
+                                                  await (jsonDecode(
                                                               filteredProductsList[
                                                                       index]
                                                                   .canvasPoints
@@ -525,6 +460,7 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                                               dynamic>)
                                                       .toList();
                                               log("List Data==>${drawingData}");
+                                              // ignore: use_build_context_synchronously
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
@@ -644,15 +580,17 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
     );
   }
 
-//Show Image Preview
-  Future<void> imagePrviewDialoge(_scaffoldKey, image) async {
-    return showDialog(
-      context: _scaffoldKey.currentContext,
+  Future<void> imagePreviewDialog(
+      List<Map<String, dynamic>> drawingData) async {
+    final Uint8List imageBytes = convertDrawingToImage(drawingData);
+
+    showDialog(
+      context: context,
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            height: 500,
-            width: 350,
+            height: 350,
+            width: 500,
             margin: const EdgeInsets.symmetric(
               horizontal: 30,
             ),
@@ -661,15 +599,65 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: Center(
-              child: CustomPaint(
-                size: Size(50, 50),
-                painter: DrawingPainter(image),
-              ),
+              child: Image.memory(imageBytes),
             ),
           ),
         );
       },
     );
+  }
+
+  Uint8List convertDrawingToImage(List<Map<String, dynamic>> drawingData) {
+    // Create a blank canvas
+    final img.Image image = img.Image(500, 500);
+
+    // Define a color for drawing (you can customize this)
+    final drawingColor = img.getColor(255, 0, 0);
+    final eraserColor =
+        img.getColor(255, 255, 255); // Set eraser color to white
+
+    for (final data in drawingData) {
+      final type = data['type'];
+
+      if (type == 'SimpleLine') {
+        // Handle SimpleLine data
+        final pathData = data['path'];
+        final steps = pathData['steps'];
+
+        for (var i = 1; i < steps.length; i++) {
+          final x1 = steps[i - 1]['x'].toDouble();
+          final y1 = steps[i - 1]['y'].toDouble();
+          final x2 = steps[i]['x'].toDouble();
+          final y2 = steps[i]['y'].toDouble();
+
+          img.drawLine(
+            image,
+            x1.round(),
+            y1.round(),
+            x2.round(),
+            y2.round(),
+            drawingColor,
+          );
+        }
+      } else if (type == 'Eraser') {
+        // Handle Eraser data
+        final pathData = data['path'];
+        final steps = pathData['steps'];
+
+        for (var i = 1; i < steps.length; i++) {
+          final x1 = steps[i - 1]['x'].toDouble();
+          final y1 = steps[i - 1]['y'].toDouble();
+          final x2 = steps[i]['x'].toDouble();
+          final y2 = steps[i]['y'].toDouble();
+
+          img.drawLine(image, x1.round(), y1.round(), x2.round(), y2.round(),
+              eraserColor);
+        }
+      }
+    }
+
+    // Encode the image to bytes
+    return Uint8List.fromList(img.encodePng(image));
   }
 
   Future<void> _showCustomDialog(_scaffoldKey, BuildContext context, String id,
@@ -770,64 +758,4 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
       },
     );
   }
-}
-
-class DrawingPainter extends CustomPainter {
-  final List<Map<String, dynamic>> drawingData;
-
-  DrawingPainter(this.drawingData);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Use drawing data to draw on the canvas
-    for (final data in drawingData) {
-      final type = data['type'];
-
-      if (type == 'SimpleLine') {
-        // Handle SimpleLine data
-        final pathData = data['path'];
-        final path = createPathFromData(pathData);
-        final paintData = data['paint'];
-        final paint = createPaintFromData(paintData);
-
-        canvas.drawPath(path, paint);
-      } else if (type == 'Eraser') {
-        // Handle Eraser data
-        // Implement eraser drawing logic
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false; // You can implement custom logic here
-  }
-}
-
-Path createPathFromData(Map<String, dynamic> pathData) {
-  final path = Path();
-  final steps = pathData['steps'];
-
-  for (final step in steps) {
-    final type = step['type'];
-    final x = step['x'];
-    final y = step['y'];
-
-    if (type == 'moveTo') {
-      path.moveTo(x.toDouble(), y.toDouble());
-    } else if (type == 'lineTo') {
-      path.lineTo(x.toDouble(), y.toDouble());
-    }
-  }
-
-  return path;
-}
-
-Paint createPaintFromData(Map<String, dynamic> paintData) {
-  final paint = Paint();
-  paint.color = Color(paintData['color']);
-  paint.strokeWidth = paintData['strokeWidth'].toDouble();
-  // Set other paint properties as needed
-
-  return paint;
 }

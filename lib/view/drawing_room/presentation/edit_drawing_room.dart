@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
 import 'package:flutter_drawing_board/paint_contents.dart';
 import 'package:flutter_drawing_board/paint_extension.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:measurment_app/res/constant/colors.dart';
 
 import 'package:measurment_app/view/measurment/edit_add_measurnment.dart';
 
@@ -272,18 +274,80 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
     return Scaffold(
       // resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Drawing Test'),
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        actions: <Widget>[
-          IconButton(
-              icon: const Icon(Icons.line_axis), onPressed: _addTestLine),
-          IconButton(
-              icon: const Icon(Icons.javascript_outlined), onPressed: _getJson),
-          IconButton(icon: const Icon(Icons.check), onPressed: _getImageData),
-          IconButton(icon: const Icon(Icons.send), onPressed: sendDrawingData),
-        ],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: Container(
+          // height: 65,
+          decoration: const BoxDecoration(
+            color: AppColors
+                .primaryColor, // Change the background color to your desired color.
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 10,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const BackButton(
+                  color: AppColors.whitedColor,
+                ),
+                const Text(
+                  "Measurements",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.whitedColor,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    sendDrawingData();
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.5),
+                          color: AppColors.whitedColor,
+                        ),
+                        child: SvgPicture.asset(
+                          "assets/svg/save.svg",
+                          height: 17,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+
+      //  AppBar(
+      //   title: const Text('Drawing Test'),
+      //   systemOverlayStyle: SystemUiOverlayStyle.light,
+      //   actions: <Widget>[
+      //     IconButton(
+      //         icon: const Icon(Icons.line_axis), onPressed: _addTestLine),
+      //     IconButton(
+      //         icon: const Icon(Icons.javascript_outlined), onPressed: _getJson),
+      //     IconButton(icon: const Icon(Icons.check), onPressed: _getImageData),
+      //     IconButton(icon: const Icon(Icons.send), onPressed: sendDrawingData),
+      //   ],
+      // ),
 
       body: Column(
         children: <Widget>[
@@ -297,19 +361,18 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     height: constraints.maxHeight,
                     color: Colors.white,
                   ),
-
-                  // showDefaultActions: true,
-                  // showDefaultTools: true,
-                  // defaultToolsBuilder: (Type t, _) {
-                  //   return DrawingBoard.defaultTools(t, _drawingController)
-                  //     ..insert(
-                  //       1,
-                  //       DefToolItem(
-                  //         icon: Icons.change_history_rounded,
-                  //         isActive: t == Triangle,
-                  //       ),
-                  //     );
-                  // },
+                  showDefaultActions: true,
+                  showDefaultTools: true,
+                  defaultToolsBuilder: (Type t, _) {
+                    return DrawingBoard.defaultTools(t, _drawingController)
+                      ..insert(
+                        1,
+                        DefToolItem(
+                          icon: Icons.change_history_rounded,
+                          isActive: t == Triangle,
+                        ),
+                      );
+                  },
                 );
               },
             ),

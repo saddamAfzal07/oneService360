@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:measurment_app/model/get_measurnments.dart';
+import 'package:measurment_app/model/product_model.dart';
 import 'package:measurment_app/res/app_url/app_url.dart';
 import 'package:measurment_app/utils/dialoges.dart';
+import 'package:measurment_app/view/drawing_room/presentation/drawing_room_screen.dart';
 import 'package:measurment_app/view/measurment/measurment.dart';
 import 'package:provider/provider.dart';
 
@@ -14,8 +16,18 @@ class MeasurementController extends ChangeNotifier {
   MeasurementController() {}
 
   Future<List<Measurement>>? getMeasurementList;
-  // List<Products> filteredMasterCaseProducDetailtList = [];
+
   bool isLoading = false;
+  isLoadingCall(value) {
+    isLoading = value;
+    notifyListeners();
+  }
+
+  bool isLoadingSaveNew = false;
+  isLoadingNew(value) {
+    isLoadingSaveNew = value;
+    notifyListeners();
+  }
 
   Future<List<Measurement>> getMeasurementApi() async {
     print("Enter into get api ");
@@ -45,7 +57,8 @@ class MeasurementController extends ChangeNotifier {
 
     log("Description ${description}");
 
-    isLoading = true;
+    // isLoading = true;
+    isLoadingCall(true);
 
     try {
       final apiEndpoint = "${AppUrl.baseurl}v1/store/measurements";
@@ -58,12 +71,6 @@ class MeasurementController extends ChangeNotifier {
         'description': description,
         'product_id': product,
       };
-      // final jsonData = jsonEncode({
-      //   // "tailor_id": 1,
-      //   // 'canvas_points': drawingData,
-      //   // 'description': description,
-      //   // 'product_id': product,
-      // });
 
       final response = await http.post(
         Uri.parse(apiEndpoint),
@@ -78,7 +85,8 @@ class MeasurementController extends ChangeNotifier {
       if (response.statusCode == 200) {
         print("Isloading=>>$isLoading");
 
-        isLoading = false;
+        isLoadingCall(false);
+
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Successfully Add  Measurement"),
           backgroundColor: Colors.green,
@@ -89,6 +97,8 @@ class MeasurementController extends ChangeNotifier {
             MaterialPageRoute(builder: (context) => const MeasurementScreen()));
         log('Drawing saved successfully.');
       } else if (response.statusCode == 302) {
+        isLoadingCall(false);
+
         // Handle redirection
         final redirectLocation = response.headers['location'];
         if (redirectLocation != null) {
@@ -103,14 +113,29 @@ class MeasurementController extends ChangeNotifier {
 
           log('Redirect Response: ${redirectResponse.statusCode}');
           if (redirectResponse.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Successfully Add  Measurement"),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 1),
+            ));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const MeasurementScreen()));
+            log('Drawing saved successfully.');
+            isLoadingCall(false);
+
             log('Drawing saved successfully after redirection.');
           } else {
             // Handle errors after redirection
             log('Failed to save drawing after redirection: ${redirectResponse.statusCode}');
           }
         }
-        isLoading = false;
+        isLoadingCall(false);
       } else {
+        isLoadingCall(false);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text("Something went wrong"),
@@ -122,10 +147,114 @@ class MeasurementController extends ChangeNotifier {
         // Handle other errors
         log('Failed to save drawing: ${response.statusCode}');
       }
-      isLoading = false;
+      isLoadingCall(false);
     } catch (e) {
       log('Error: $e');
-      isLoading = false;
+      isLoadingCall(false);
+    }
+    notifyListeners();
+  }
+
+  //Save and Add new Measurnment
+  void saveAndAddNewMeasurnment(List<Map<String, dynamic>> drawingData,
+      String description, String product, context) async {
+    log("Product ${product}");
+    log("Drawing ${drawingData}");
+
+    log("Description ${description}");
+
+    // isLoading = true;
+    isLoadingNew(true);
+
+    try {
+      final apiEndpoint = "${AppUrl.baseurl}v1/store/measurements";
+      final String jsonData = jsonEncode(drawingData);
+      log("jsonData ${jsonData}");
+      // Convert your data to a Map
+      Map<String, dynamic> requestData = {
+        "tailor_id": "1",
+        'canvas_points': jsonData,
+        'description': description,
+        'product_id': product,
+      };
+
+      final response = await http.post(
+        Uri.parse(apiEndpoint),
+        // headers: <String, String>{
+        //   'Content-Type': 'application/json; charset=UTF-8',
+        // },
+        body: requestData,
+      );
+
+      log(response.statusCode.toString());
+
+      if (response.statusCode == 200) {
+        print("Isloading=>>$isLoading");
+
+        isLoadingNew(false);
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Successfully Add  Measurement"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 1),
+        ));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const DrawingRoomScreen()));
+        log('Drawing saved successfully.');
+      } else if (response.statusCode == 302) {
+        isLoadingNew(false);
+
+        // Handle redirection
+        final redirectLocation = response.headers['location'];
+        if (redirectLocation != null) {
+          // Make a new request to the redirect location
+          final redirectResponse = await http.post(
+            Uri.parse(redirectLocation),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: jsonData,
+          );
+
+          log('Redirect Response: ${redirectResponse.statusCode}');
+          if (redirectResponse.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Successfully Add  Measurement"),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 1),
+            ));
+            isLoadingNew(false);
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const DrawingRoomScreen()));
+
+            log('Drawing saved successfully after redirection.');
+          } else {
+            log('Failed to save drawing after redirection: ${redirectResponse.statusCode}');
+          }
+        }
+        isLoadingNew(false);
+      } else {
+        isLoadingNew(false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text("Something went wrong"),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+        // Handle other errors
+        log('Failed to save drawing: ${response.statusCode}');
+      }
+      isLoadingNew(false);
+    } catch (e) {
+      log('Error: $e');
+      isLoadingNew(false);
     }
     notifyListeners();
   }
@@ -138,6 +267,108 @@ class MeasurementController extends ChangeNotifier {
     required String product,
     context,
   }) async {
+    isLoadingCall(true);
+    print("Enterinto update");
+
+    final String jsonData = jsonEncode(drawingData);
+    log("drawingData ${jsonData}");
+    // Convert your data to a Map
+    Map<String, dynamic> requestData = {
+      "id": id,
+      "tailor_id": "1",
+      'canvas_points': jsonData,
+      'description': description,
+      'product_id': product,
+    };
+    try {
+      final apiEndpoint = "${AppUrl.baseurl}v1/update/measurement";
+
+      final response = await http.post(
+        Uri.parse(apiEndpoint),
+        body: requestData,
+      );
+
+      log(response.statusCode.toString());
+
+      if (response.statusCode == 200) {
+        isLoadingCall(false);
+        // Drawing successfully saved on the server.
+        log('Drawing saved successfully.');
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Successfully Add  Measurement"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 1),
+        ));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const MeasurementScreen()));
+      } else if (response.statusCode == 302) {
+        isLoadingCall(false);
+
+        // Handle redirection
+        final redirectLocation = response.headers['location'];
+        if (redirectLocation != null) {
+          // Make a new request to the redirect location
+          final redirectResponse = await http.post(
+            Uri.parse(redirectLocation),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: jsonData,
+          );
+
+          log('Redirect Response: ${redirectResponse.statusCode}');
+          if (redirectResponse.statusCode == 200) {
+            isLoadingCall(false);
+
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Successfully update  Measurement"),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 1),
+            ));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const MeasurementScreen()));
+            log('Drawing saved successfully after redirection.');
+          } else {
+            // Handle errors after redirection
+            log('Failed to save drawing after redirection: ${redirectResponse.statusCode}');
+          }
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text("Something went wrong Try Again"),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+        ));
+        // Handle other errors
+        log('Failed to save drawing: ${response.statusCode}');
+      }
+    } catch (e) {
+      isLoadingCall(false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text("Something went wrong Try Again"),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 1),
+      ));
+
+      log('Error: $e');
+    }
+  }
+
+  //Update Save And New
+  void updateSaveNewDrawing({
+    required String id,
+    required List<Map<String, dynamic>> drawingData,
+    required String description,
+    required String product,
+    context,
+  }) async {
+    isLoadingNew(true);
     print("Enterinto update");
 
     final String jsonData = jsonEncode(drawingData);
@@ -172,6 +403,7 @@ class MeasurementController extends ChangeNotifier {
       log(response.statusCode.toString());
 
       if (response.statusCode == 200) {
+        isLoadingNew(false);
         // Drawing successfully saved on the server.
         log('Drawing saved successfully.');
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -181,8 +413,10 @@ class MeasurementController extends ChangeNotifier {
           duration: Duration(seconds: 1),
         ));
         Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const MeasurementScreen()));
+            MaterialPageRoute(builder: (context) => const DrawingRoomScreen()));
       } else if (response.statusCode == 302) {
+        isLoadingNew(false);
+
         // Handle redirection
         final redirectLocation = response.headers['location'];
         if (redirectLocation != null) {
@@ -197,6 +431,8 @@ class MeasurementController extends ChangeNotifier {
 
           log('Redirect Response: ${redirectResponse.statusCode}');
           if (redirectResponse.statusCode == 200) {
+            isLoadingNew(false);
+
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("Successfully update  Measurement"),
               backgroundColor: Colors.green,
@@ -206,7 +442,7 @@ class MeasurementController extends ChangeNotifier {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const MeasurementScreen()));
+                    builder: (context) => const DrawingRoomScreen()));
             log('Drawing saved successfully after redirection.');
           } else {
             // Handle errors after redirection
@@ -214,8 +450,9 @@ class MeasurementController extends ChangeNotifier {
           }
         }
       } else {
+        isLoadingNew(false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text("Something went wrong "),
+          content: const Text("Something went wrong Try Again"),
           backgroundColor: Colors.red.shade400,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 1),
@@ -224,6 +461,14 @@ class MeasurementController extends ChangeNotifier {
         log('Failed to save drawing: ${response.statusCode}');
       }
     } catch (e) {
+      isLoadingNew(false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text("Something went wrong Try Again"),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 1),
+      ));
+
       log('Error: $e');
     }
   }
@@ -278,4 +523,7 @@ class MeasurementController extends ChangeNotifier {
     }
     // notifyListeners();
   }
+
+  ///get Products Details
+  List<Data> productsList = [];
 }
