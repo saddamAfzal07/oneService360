@@ -12,7 +12,7 @@ class EditMeasurnment extends StatefulWidget {
 
   final String description;
 
-  List<DrawingPoint> drawingData;
+  List<Map<String, dynamic>> drawingData;
   EditMeasurnment(
       {super.key,
       required this.drawingData,
@@ -194,41 +194,6 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Card(
-                          //   elevation: 4,
-                          //   child: Container(
-                          //     height: 55,
-                          //     decoration: BoxDecoration(
-                          //       color: AppColors.whitedColor,
-                          //       borderRadius: BorderRadius.circular(
-                          //         6,
-                          //       ),
-                          //     ),
-                          //     child: Row(
-                          //       children: [
-                          //         Expanded(
-                          //           child: TextField(
-                          //             cursorColor: AppColors.primaryColor,
-                          //             style: const TextStyle(
-                          //                 color: AppColors.whitedColor),
-                          //             decoration: const InputDecoration(
-                          //               hintText: 'Search',
-                          //               border: InputBorder.none,
-                          //               hintStyle: TextStyle(
-                          //                 color: AppColors.textGreyColor,
-                          //                 fontSize: 14,
-                          //               ),
-                          //               labelStyle: TextStyle(
-                          //                   color: AppColors.whitedColor),
-                          //               contentPadding: EdgeInsets.all(12),
-                          //             ),
-                          //             onChanged: (value) {},
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
                           ListView.builder(
                               shrinkWrap: true,
                               itemCount: category.length,

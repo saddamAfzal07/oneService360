@@ -1,506 +1,321 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:measurment_app/controller/measurment_controller.dart';
-import 'package:measurment_app/res/constant/colors.dart';
-import 'package:measurment_app/view/drawing_room/model/drawing_point.dart';
-import 'package:measurment_app/view/measurment/edit_add_measurnment.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_drawing_board/flutter_drawing_board.dart';
+import 'package:flutter_drawing_board/paint_contents.dart';
+import 'package:flutter_drawing_board/paint_extension.dart';
 
-import '../../measurment/add_measurnment.dart';
+import 'package:measurment_app/view/measurment/edit_add_measurnment.dart';
+
+import 'test_data.dart';
+
+const Map<String, dynamic> _testLine1 = <String, dynamic>{
+  'type': 'StraightLine',
+  'startPoint': <String, dynamic>{
+    'dx': 68.94337550070736,
+    'dy': 62.05980083656557
+  },
+  'endPoint': <String, dynamic>{
+    'dx': 277.1373386828114,
+    'dy': 277.32029957032194
+  },
+  'paint': <String, dynamic>{
+    'blendMode': 3,
+    'color': 4294198070,
+    'filterQuality': 3,
+    'invertColors': false,
+    'isAntiAlias': false,
+    'strokeCap': 1,
+    'strokeJoin': 1,
+    'strokeWidth': 4.0,
+    'style': 1
+  }
+};
+
+const Map<String, dynamic> _testLine2 = <String, dynamic>{
+  'type': 'Eraser',
+  'startPoint': <String, dynamic>{
+    'dx': 106.35164817830423,
+    'dy': 255.9575653134524
+  },
+  'endPoint': <String, dynamic>{
+    'dx': 292.76034659254094,
+    'dy': 92.125586665872
+  },
+  'paint': <String, dynamic>{
+    'blendMode': 3,
+    'color': 4294967295,
+    'filterQuality': 3,
+    'invertColors': false,
+    'isAntiAlias': false,
+    'strokeCap': 1,
+    'strokeJoin': 1,
+    'strokeWidth': 4.0,
+    'style': 1
+  }
+};
+
+/// 自定义绘制三角形
+class Triangle extends PaintContent {
+  Triangle();
+
+  Triangle.data({
+    required this.startPoint,
+    required this.A,
+    required this.B,
+    required this.C,
+    required Paint paint,
+  }) : super.paint(paint);
+
+  factory Triangle.fromJson(Map<String, dynamic> data) {
+    return Triangle.data(
+      startPoint: jsonToOffset(data['startPoint'] as Map<String, dynamic>),
+      A: jsonToOffset(data['A'] as Map<String, dynamic>),
+      B: jsonToOffset(data['B'] as Map<String, dynamic>),
+      C: jsonToOffset(data['C'] as Map<String, dynamic>),
+      paint: jsonToPaint(data['paint'] as Map<String, dynamic>),
+    );
+  }
+
+  Offset startPoint = Offset.zero;
+
+  Offset A = Offset.zero;
+  Offset B = Offset.zero;
+  Offset C = Offset.zero;
+
+  @override
+  void startDraw(Offset startPoint) => this.startPoint = startPoint;
+
+  @override
+  void drawing(Offset nowPoint) {
+    A = Offset(
+        startPoint.dx + (nowPoint.dx - startPoint.dx) / 2, startPoint.dy);
+    B = Offset(startPoint.dx, nowPoint.dy);
+    C = nowPoint;
+  }
+
+  @override
+  void draw(Canvas canvas, Size size, bool deeper) {
+    final Path path = Path()
+      ..moveTo(A.dx, A.dy)
+      ..lineTo(B.dx, B.dy)
+      ..lineTo(C.dx, C.dy)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  Triangle copy() => Triangle();
+
+  @override
+  Map<String, dynamic> toContentJson() {
+    return <String, dynamic>{
+      'startPoint': startPoint.toJson(),
+      'A': A.toJson(),
+      'B': B.toJson(),
+      'C': C.toJson(),
+      'paint': paint.toJson(),
+    };
+  }
+}
 
 class EditDrawingRoomScreen extends StatefulWidget {
-  final List<DrawingPoint> drawingDataPoint;
+  final List<Map<String, dynamic>> drawingData;
   final String id;
   final String product;
 
   final String description;
 
   const EditDrawingRoomScreen(
-      {super.key,
-      required this.drawingDataPoint,
+      {Key? key,
+      required this.drawingData,
       required this.id,
       required this.product,
-      required this.description});
+      required this.description})
+      : super(key: key);
 
   @override
   State<EditDrawingRoomScreen> createState() => _EditDrawingRoomScreenState();
 }
 
 class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
-  var avaiableColor = [
-    Colors.black,
-    Colors.red,
-    Colors.amber,
-    Colors.blue,
-    Colors.green,
-    Colors.brown,
-  ];
+  final DrawingController _drawingController = DrawingController();
 
-  var historyDrawingPoints = <DrawingPoint>[];
-  var drawingPoints = <DrawingPoint>[];
+  @override
+  void dispose() {
+    _drawingController.dispose();
+    super.dispose();
+  }
 
-  var selectedColor = Colors.black;
-  var selectedWidth = 2.0;
+  /// 获取画板数据 `getImageData()`
+  Future<void> _getImageData() async {
+    final Uint8List? data =
+        (await _drawingController.getImageData())?.buffer.asUint8List();
+    if (data == null) {
+      debugPrint('获取图片数据失败');
+      return;
+    }
 
-  DrawingPoint? currentDrawingPoint;
-  bool pencilColor = false;
+    if (mounted) {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext c) {
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+                onTap: () => Navigator.pop(c), child: Image.memory(data)),
+          );
+        },
+      );
+    }
+  }
+
+  /// 获取画板内容 Json `getJsonList()`
+  Future<void> _getJson() async {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext c) {
+        return Center(
+          child: Material(
+            color: Colors.white,
+            child: InkWell(
+              onTap: () => Navigator.pop(c),
+              child: Container(
+                constraints:
+                    const BoxConstraints(maxWidth: 500, maxHeight: 800),
+                padding: const EdgeInsets.all(20.0),
+                child: SelectableText(
+                  const JsonEncoder.withIndent('  ')
+                      .convert(_drawingController.getJsonList()),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 添加Json测试内容
+  void _addTestLine() {
+    _drawingController.addContent(StraightLine.fromJson(_testLine1));
+    _drawingController
+        .addContents(<PaintContent>[StraightLine.fromJson(_testLine2)]);
+
+    _drawingController.addContent(SimpleLine.fromJson(tData[0]));
+    _drawingController.addContent(Eraser.fromJson(tData[1]));
+  }
+
+  List<Map<String, dynamic>> getDrawingData() {
+    print("==>>Enter into getDrawingData");
+    final List<Map<String, dynamic>> drawingData =
+        _drawingController.getJsonList();
+    return drawingData;
+  }
+
+  void sendDrawingData() {
+    // Assuming you have drawing data in the format you want to send
+    List<Map<String, dynamic>> drawingData = getDrawingData();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMeasurnment(
+          id: widget.id,
+          description: widget.description,
+          product: widget.product,
+          drawingData: drawingData,
+        ),
+      ),
+    );
+    // sendDrawingDataToServer(drawingData);
+  }
+
+  Future<void> sendDrawingDataToServer(
+      List<Map<String, dynamic>> drawingData) async {
+    final String jsonData = jsonEncode(drawingData);
+
+    log("Json Data==>>${jsonData}");
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    drawingPoints = widget.drawingDataPoint;
-    print("Drawing Points==>>>${widget.drawingDataPoint}");
-    setState(() {});
+    log("${widget.drawingData}");
+
+    List<Map<String, dynamic>> jsonData = widget.drawingData;
+
+    List<PaintContent> originalDrawingContents = [];
+    List<PaintContent> eraserContents = [];
+
+    jsonData.forEach((data) {
+      if (data['type'] == 'Eraser') {
+        print("===>>>If");
+        eraserContents.add(Eraser.fromJson(data));
+        _drawingController.addContents(eraserContents);
+      } else {
+        print("==>>>Else");
+
+        originalDrawingContents.add(SimpleLine.fromJson(data));
+        _drawingController.addContents(originalDrawingContents);
+      }
+    });
   }
 
+  @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-    final dataProvider = Provider.of<MeasurementController>(context);
-
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: Container(
-          // height: 65,
-          decoration: const BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    BackButton(
-                      color: AppColors.whitedColor,
-                    ),
-                    Text(
-                      "New Measurnment",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.whitedColor,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 6,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+      // resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Drawing Test'),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        actions: <Widget>[
+          IconButton(
+              icon: const Icon(Icons.line_axis), onPressed: _addTestLine),
+          IconButton(
+              icon: const Icon(Icons.javascript_outlined), onPressed: _getJson),
+          IconButton(icon: const Icon(Icons.check), onPressed: _getImageData),
+          IconButton(icon: const Icon(Icons.send), onPressed: sendDrawingData),
+        ],
       ),
+
       body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-                height: 70,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        if (drawingPoints.isNotEmpty &&
-                            historyDrawingPoints.isNotEmpty) {
-                          setState(() {
-                            drawingPoints.removeLast();
-                          });
-                        }
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(22.5),
-                                color: AppColors.primaryColor),
-                            child: SvgPicture.asset(
-                              "assets/svg/eraser.svg",
-                              height: 16,
-                            ),
-                            //  Image.asset("assets/images/redo.png"),
-                          ),
-                          const Text(
-                            "Erase",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (drawingPoints.length <
-                              historyDrawingPoints.length) {
-                            // 6 length 7
-                            final index = drawingPoints.length;
-                            drawingPoints.add(historyDrawingPoints[index]);
-                          }
-                        });
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22.5),
-                              color: AppColors.primaryColor,
-                            ),
-                            child: SvgPicture.asset(
-                              "assets/svg/undo.svg",
-                              height: 17,
-                              color: AppColors.whitedColor,
-                            ),
-                          ),
-                          const Text(
-                            "Undo",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          drawingPoints.clear();
-                        });
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22.5),
-                              color: AppColors.primaryColor,
-                            ),
-                            child: SvgPicture.asset(
-                              "assets/svg/clear.svg",
-                              height: 17,
-                              color: AppColors.whitedColor,
-                            ),
-                          ),
-                          const Text(
-                            "Clear",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          pencilColor = !pencilColor;
-                        });
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22.5),
-                              color: AppColors.primaryColor,
-                            ),
-                            child: SvgPicture.asset(
-                              "assets/svg/colorfilter.svg",
-                              height: 17,
-                            ),
-                          ),
-                          const Text(
-                            "Pen",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditMeasurnment(
-                              id: widget.id,
-                              description: widget.description,
-                              product: widget.product,
-                              drawingData: drawingPoints,
-                            ),
-                          ),
-                        );
-                        // dataProvider.updateDrawing(
-                        //     id: widget.id,
-                        //     description: widget.description,
-                        //     product: widget.product,
-                        //     drawingData: drawingPoints);
-                        // Navigator.pop(context);
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22.5),
-                              color: AppColors.primaryColor,
-                            ),
-                            child: SvgPicture.asset(
-                              "assets/svg/save.svg",
-                              height: 17,
-                              color: AppColors.whitedColor,
-                            ),
-                          ),
-                          const Text(
-                            "Save",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                )),
-          ),
-          SizedBox(
-            width: width,
-            height: height * 0.76,
-            child: Stack(
-              children: [
-                /// Canvas
-                GestureDetector(
-                  onPanStart: (details) {
-                    setState(() {
-                      currentDrawingPoint = DrawingPoint(
-                        id: DateTime.now().microsecondsSinceEpoch,
-                        offsets: [
-                          details.localPosition,
-                        ],
-                        color: selectedColor,
-                        width: selectedWidth,
-                      );
-
-                      if (currentDrawingPoint == null) return;
-                      drawingPoints.add(currentDrawingPoint!);
-                      historyDrawingPoints = List.of(drawingPoints);
-                    });
-                    log("Drawing ==>${drawingPoints}");
-
-                    log("Drawing length==>${drawingPoints.length}");
-                  },
-                  onPanUpdate: (details) {
-                    setState(() {
-                      if (currentDrawingPoint == null) return;
-
-                      currentDrawingPoint = currentDrawingPoint?.copyWith(
-                        offsets: currentDrawingPoint!.offsets
-                          ..add(details.localPosition),
-                      );
-                      drawingPoints.last = currentDrawingPoint!;
-                      historyDrawingPoints = List.of(drawingPoints);
-                    });
-                  },
-                  onPanEnd: (_) {
-                    currentDrawingPoint = null;
-                  },
-                  child: CustomPaint(
-                    painter:
-                        DrawingPainter(drawingPoints: widget.drawingDataPoint),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                    ),
+        children: <Widget>[
+          Expanded(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return DrawingBoard(
+                  controller: _drawingController,
+                  background: Container(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    color: Colors.white,
                   ),
-                ),
 
-                // / color pallet
-                Visibility(
-                  visible: pencilColor,
-                  child: Positioned(
-                    top: 0,
-                    left: 16,
-                    right: 16,
-                    child: SizedBox(
-                      height: 80,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: avaiableColor.length,
-                        separatorBuilder: (_, __) {
-                          return const SizedBox(width: 8);
-                        },
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedColor = avaiableColor[index];
-                              });
-                            },
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: avaiableColor[index],
-                                shape: BoxShape.circle,
-                              ),
-                              foregroundDecoration: BoxDecoration(
-                                border: selectedColor == avaiableColor[index]
-                                    ? Border.all(
-                                        color: AppColors.primaryColor, width: 4)
-                                    : null,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-
-                /// pencil size
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 80,
-                  right: 0,
-                  bottom: 150,
-                  child: RotatedBox(
-                    quarterTurns: 3, // 270 degree
-                    child: Slider(
-                      value: selectedWidth,
-                      min: 1,
-                      max: 20,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedWidth = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                  // showDefaultActions: true,
+                  // showDefaultTools: true,
+                  // defaultToolsBuilder: (Type t, _) {
+                  //   return DrawingBoard.defaultTools(t, _drawingController)
+                  //     ..insert(
+                  //       1,
+                  //       DefToolItem(
+                  //         icon: Icons.change_history_rounded,
+                  //         isActive: t == Triangle,
+                  //       ),
+                  //     );
+                  // },
+                );
+              },
             ),
           ),
         ],
       ),
     );
-  }
-
-  List<Offset> convertDrawingPointsToOffsets(List<DrawingPoint> drawingPoints) {
-    List<Offset> offsets = [];
-    for (DrawingPoint drawingPoint in drawingPoints) {
-      for (Offset offset in drawingPoint.offsets) {
-        offsets.add(offset);
-      }
-    }
-    return offsets;
-  }
-}
-
-// class DrawingPainter extends CustomPainter {
-//   final List<DrawingPoint> drawingPoints;
-
-//   DrawingPainter({required this.drawingPoints});
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     for (var drawingPoint in drawingPoints) {
-//       final paint = Paint()
-//         ..color = drawingPoint.color
-//         ..isAntiAlias = true
-//         ..strokeWidth = drawingPoint.width
-//         ..strokeCap = StrokeCap.round;
-
-//       final path = Path();
-//       if (drawingPoint.offsets.isNotEmpty) {
-//         path.moveTo(
-//             drawingPoint.offsets.first.dx, drawingPoint.offsets.first.dy);
-//         for (var offset in drawingPoint.offsets) {
-//           path.lineTo(offset.dx, offset.dy);
-//         }
-//       }
-
-//       canvas.drawPath(path, paint);
-//     }
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-//     return true;
-//   }
-// }
-
-class DrawingPainter extends CustomPainter {
-  final List<DrawingPoint> drawingPoints;
-
-  DrawingPainter({required this.drawingPoints});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (var drawingPoint in drawingPoints) {
-      final paint = Paint()
-        ..color = drawingPoint.color
-        ..isAntiAlias = true
-        ..strokeWidth = drawingPoint.width
-        ..strokeCap = StrokeCap.butt;
-
-      for (var i = 0; i < drawingPoint.offsets.length; i++) {
-        var notLastOffset = i != drawingPoint.offsets.length - 1;
-
-        if (notLastOffset) {
-          final current = drawingPoint.offsets[i];
-          final next = drawingPoint.offsets[i + 1];
-          canvas.drawLine(current, next, paint);
-        } else {
-          canvas.drawCircle(
-            drawingPoint.offsets[i],
-            drawingPoint.width,
-            paint,
-          );
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }

@@ -7,7 +7,8 @@ import 'package:measurment_app/view/drawing_room/model/drawing_point.dart';
 import 'package:provider/provider.dart';
 
 class AddMeasurnment extends StatefulWidget {
-  List<DrawingPoint> drawingData;
+  // List<DrawingPoint> drawingData;
+  List<Map<String, dynamic>> drawingData;
   AddMeasurnment({super.key, required this.drawingData});
 
   @override
@@ -384,6 +385,7 @@ class _AddMeasurnmentState extends State<AddMeasurnment> {
                           );
                         } else {
                           controller.saveDrawing(
+                            // widget.drawingData,
                             widget.drawingData,
                             descriptionController.text,
                             productName.toLowerCase().toString(),
