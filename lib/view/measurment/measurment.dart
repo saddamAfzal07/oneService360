@@ -23,11 +23,10 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
-import 'package:flutter_drawing_board/paint_contents.dart';
-import 'package:flutter_drawing_board/paint_extension.dart';
+
 import 'package:image/image.dart' as img;
 
 class MeasurementScreen extends StatefulWidget {

@@ -524,6 +524,25 @@ class MeasurementController extends ChangeNotifier {
     // notifyListeners();
   }
 
-  ///get Products Details
-  List<Data> productsList = [];
+  Future<List<Data>>? getProductList;
+  Future<List<Data>> getProductApi() async {
+    print("Enter into get Product ");
+    final response = await http.get(
+      Uri.parse("${AppUrl.baseurl}v1/get/user/products?user_id=1}"),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonResponse["data"];
+        // print("Response body==>>${response.body}");
+        return jsonList.map((json) => Data.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to fetch products');
+      }
+    } else {
+      throw Exception('Failed to fetch products');
+    }
+  }
 }

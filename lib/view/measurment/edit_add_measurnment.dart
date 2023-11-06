@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:measurment_app/controller/measurment_controller.dart';
+import 'package:measurment_app/model/product_model.dart';
 import 'package:measurment_app/res/constant/colors.dart';
 import 'package:measurment_app/utils/fading_circular_indicator.dart';
 import 'package:measurment_app/view/drawing_room/model/drawing_point.dart';
@@ -30,6 +31,9 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
   String productName = "Product Name";
   TextEditingController descriptionController = TextEditingController();
   TextEditingController productController = TextEditingController();
+  List<Data> filteredProductsList = [];
+  TextEditingController searhController = TextEditingController();
+  final TextEditingController search = TextEditingController();
   @override
   void initState() {
     // TODO: implement initState
@@ -120,7 +124,7 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 30),
                   child: Text(
-                    "New Measurement Details!",
+                    "Edit Measurement Details!",
                     style: TextStyle(
                       fontSize: 18,
                       color: AppColors.blackColor,
@@ -177,11 +181,13 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
                     ),
                   ),
                 ),
+
                 Visibility(
                   visible: dropDownVisibility,
                   child: Card(
                     elevation: 4,
                     child: Container(
+                      height: 250,
                       padding: const EdgeInsets.all(20),
                       alignment: Alignment.centerLeft,
                       width: width,
@@ -191,36 +197,204 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
                           6,
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: category.length,
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  onTap: () {
-                                    dropDownVisibility = !dropDownVisibility;
-                                    setState(() {});
-                                    productName = category[index].toString();
-                                    selectValue = true;
-                                  },
-                                  child: Text(
-                                    category[index].toString(),
-                                    style: const TextStyle(
-                                      height: 2,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.blackColor,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          // mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Card(
+                                elevation: 4,
+                                child: Container(
+                                  height: 55,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.whitedColor,
+                                    borderRadius: BorderRadius.circular(
+                                      6,
                                     ),
                                   ),
-                                );
-                              })
-                        ],
+                                  child: Row(
+                                    children: [
+                                      // Padding(
+                                      //   padding: const EdgeInsets.only(left: 16, right: 6),
+                                      //   child: SvgPicture.asset(
+                                      //     "assets/svg/search.svg",
+                                      //     height: 30,
+                                      //   ),
+                                      // ),
+                                      // Padding(
+                                      //   padding: const EdgeInsets.symmetric(
+                                      //       vertical: 5, horizontal: 5),
+                                      //   child: Container(
+                                      //     width: 2,
+                                      //     color: AppColors.lightBlue,
+                                      //   ),
+                                      // ),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: searhController,
+                                          cursorColor: AppColors.primaryColor,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Search ',
+                                            border: InputBorder.none,
+                                            hintStyle: TextStyle(
+                                              color: AppColors.textGreyColor,
+                                              fontSize: 14,
+                                            ),
+                                            labelStyle: TextStyle(
+                                                color: AppColors.whitedColor),
+                                            contentPadding: EdgeInsets.all(12),
+                                          ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              search.text = value.toLowerCase();
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            FutureBuilder<List<Data>>(
+                              future: dataProvider.getProductApi(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return SizedBox(
+                                    height: height * 0.2,
+                                    child: const Center(
+                                        child: SpinKitFadingCircle(
+                                      color: AppColors.primaryColor,
+                                    )),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Center(
+                                      child: Text('Nothing Found'));
+                                } else {
+                                  filteredProductsList = snapshot.data!;
+
+                                  if (searhController.text.isNotEmpty) {
+                                    filteredProductsList = filteredProductsList
+                                        .where((product) => product.name
+                                            .toString()
+                                            .toLowerCase()
+                                            .contains(search.text))
+                                        .toList();
+                                  }
+
+                                  return ListView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemCount: filteredProductsList.length,
+                                    itemBuilder: (context, index) {
+                                      return InkWell(
+                                        onTap: () {
+                                          dropDownVisibility =
+                                              !dropDownVisibility;
+                                          setState(() {});
+                                          productName =
+                                              filteredProductsList[index]
+                                                  .name
+                                                  .toString();
+                                          selectValue = true;
+                                        },
+                                        child: Text(
+                                          filteredProductsList[index]
+                                              .name
+                                              .toString(),
+                                          style: const TextStyle(
+                                            height: 2,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.blackColor,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                            // ListView.builder(
+                            //     shrinkWrap: true,
+                            //     itemCount: category.length,
+                            //     itemBuilder: (context, index) {
+                            //       return InkWell(
+                            //         onTap: () {
+                            //           dropDownVisibility = !dropDownVisibility;
+                            //           setState(() {});
+                            //           productName = category[index].toString();
+                            //           selectValue = true;
+                            //         },
+                            //         child: Text(
+                            //           category[index].toString(),
+                            //           style: const TextStyle(
+                            //             height: 2,
+                            //             fontSize: 16,
+                            //             fontWeight: FontWeight.w500,
+                            //             color: AppColors.blackColor,
+                            //           ),
+                            //         ),
+                            //       );
+                            //     })
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
+
+                // Visibility(
+                //   visible: dropDownVisibility,
+                //   child: Card(
+                //     elevation: 4,
+                //     child: Container(
+                //       padding: const EdgeInsets.all(20),
+                //       alignment: Alignment.centerLeft,
+                //       width: width,
+                //       decoration: BoxDecoration(
+                //         color: AppColors.whitedColor,
+                //         borderRadius: BorderRadius.circular(
+                //           6,
+                //         ),
+                //       ),
+                //       child: Column(
+                //         crossAxisAlignment: CrossAxisAlignment.start,
+                //         children: [
+                //           ListView.builder(
+                //               shrinkWrap: true,
+                //               itemCount: category.length,
+                //               itemBuilder: (context, index) {
+                //                 return InkWell(
+                //                   onTap: () {
+                //                     dropDownVisibility = !dropDownVisibility;
+                //                     setState(() {});
+                //                     productName = category[index].toString();
+                //                     selectValue = true;
+                //                   },
+                //                   child: Text(
+                //                     category[index].toString(),
+                //                     style: const TextStyle(
+                //                       height: 2,
+                //                       fontSize: 16,
+                //                       fontWeight: FontWeight.w500,
+                //                       color: AppColors.blackColor,
+                //                     ),
+                //                   ),
+                //                 );
+                //               })
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // ),
+
                 const SizedBox(
                   height: 10,
                 ),
@@ -265,7 +439,10 @@ class _EditMeasurnmentState extends State<EditMeasurnment> {
                                       border: InputBorder.none,
                                       contentPadding: EdgeInsets.all(12),
                                     ),
-                                    onChanged: (value) {},
+                                    onChanged: (value) {
+                                      dropDownVisibility = false;
+                                      setState(() {});
+                                    },
                                   ),
                                 )
                         ],

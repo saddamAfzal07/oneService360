@@ -13,6 +13,7 @@ import 'package:flutter_drawing_board/flutter_drawing_board.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:measurment_app/res/constant/colors.dart';
 import 'package:measurment_app/view/measurment/add_measurnment.dart';
+import 'package:measurment_app/view/measurment/measurment.dart';
 
 import 'test_data.dart';
 
@@ -283,7 +284,15 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const BackButton(
+                BackButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MeasurementScreen(),
+                      ),
+                    );
+                  },
                   color: AppColors.whitedColor,
                 ),
                 const Text(
@@ -336,35 +345,46 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
       //     IconButton(icon: const Icon(Icons.send), onPressed: sendDrawingData),
       //   ],
       // ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return DrawingBoard(
-                  controller: _drawingController,
-                  background: Container(
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
-                    color: Colors.white,
-                  ),
-                  showDefaultActions: true,
-                  showDefaultTools: true,
-                  defaultToolsBuilder: (Type t, _) {
-                    return DrawingBoard.defaultTools(t, _drawingController)
-                      ..insert(
-                        1,
-                        DefToolItem(
-                          icon: Icons.change_history_rounded,
-                          isActive: t == Triangle,
-                        ),
-                      );
-                  },
-                );
-              },
+      body: WillPopScope(
+        onWillPop: () async {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MeasurementScreen(),
             ),
-          ),
-        ],
+          );
+          return true;
+        },
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return DrawingBoard(
+                    controller: _drawingController,
+                    background: Container(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      color: Colors.white,
+                    ),
+                    showDefaultActions: true,
+                    showDefaultTools: true,
+                    defaultToolsBuilder: (Type t, _) {
+                      return DrawingBoard.defaultTools(t, _drawingController)
+                        ..insert(
+                          1,
+                          DefToolItem(
+                            icon: Icons.change_history_rounded,
+                            isActive: t == Triangle,
+                          ),
+                        );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
