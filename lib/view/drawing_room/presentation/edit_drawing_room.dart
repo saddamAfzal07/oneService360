@@ -6,10 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
+import 'package:flutter_drawing_board/helpers.dart';
 import 'package:flutter_drawing_board/paint_contents.dart';
 import 'package:flutter_drawing_board/paint_extension.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:measurment_app/res/constant/colors.dart';
+import 'package:measurment_app/utils/fading_circular_indicator.dart';
+// import 'package:measurment_app/view/drawing_class.dart/drawing_class.dart';
 
 import 'package:measurment_app/view/measurment/edit_add_measurnment.dart';
 
@@ -244,28 +247,49 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
     log("Json Data==>>${jsonData}");
   }
 
+  bool isLoading = true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    log("${widget.drawingData}");
 
-    List<Map<String, dynamic>> jsonData = widget.drawingData;
+    log("Drawing Data==>>>${widget.drawingData}");
 
-    List<PaintContent> originalDrawingContents = [];
-    List<PaintContent> eraserContents = [];
+    Future.delayed(const Duration(seconds: 1), () async {
+      stopLoader();
+      List<Map<String, dynamic>> jsonData = widget.drawingData;
 
-    jsonData.forEach((data) {
-      if (data['type'] == 'Eraser') {
-        print("===>>>If");
-        eraserContents.add(Eraser.fromJson(data));
-        _drawingController.addContents(eraserContents);
-      } else {
-        print("==>>>Else");
+      List<PaintContent> originalDrawingContents = [];
+      List<PaintContent> eraserContents = [];
 
-        originalDrawingContents.add(SimpleLine.fromJson(data));
-        _drawingController.addContents(originalDrawingContents);
-      }
+      jsonData.forEach((data) {
+        if (data['type'] == 'Eraser') {
+          print("===>>>If");
+          eraserContents.add(Eraser.fromJson(data));
+          _drawingController.addContents(eraserContents);
+
+          // setState(() {
+          //   isLoading = false;
+          // });
+        } else {
+          print("==>>>Else");
+
+          originalDrawingContents.add(SimpleLine.fromJson(data));
+          _drawingController.addContents(originalDrawingContents);
+          // setState(() {
+          //   isLoading = false;
+          // });
+        }
+      });
+    });
+  }
+
+  stopLoader() {
+    print("Enter into stop loader");
+    Future.delayed(const Duration(seconds: 5), () async {
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
@@ -277,7 +301,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Container(
-          // height: 65,
+          height: 80,
           decoration: const BoxDecoration(
             color: AppColors
                 .primaryColor, // Change the background color to your desired color.
@@ -286,8 +310,8 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
               bottomRight: Radius.circular(12),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
+          child: const Padding(
+            padding: EdgeInsets.symmetric(
               horizontal: 10.0,
               vertical: 10,
             ),
@@ -295,10 +319,10 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const BackButton(
+                BackButton(
                   color: AppColors.whitedColor,
                 ),
-                const Text(
+                Text(
                   "Measurements",
                   style: TextStyle(
                     fontSize: 16,
@@ -306,30 +330,31 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     color: AppColors.whitedColor,
                   ),
                 ),
-                InkWell(
-                  onTap: () {
-                    sendDrawingData();
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.5),
-                          color: AppColors.whitedColor,
-                        ),
-                        child: SvgPicture.asset(
-                          "assets/svg/save.svg",
-                          height: 17,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                SizedBox(),
+                // InkWell(
+                //   onTap: () {
+                //     sendDrawingData();
+                //   },
+                //   child: Column(
+                //     mainAxisAlignment: MainAxisAlignment.end,
+                //     children: [
+                //       Container(
+                //         alignment: Alignment.center,
+                //         width: 45,
+                //         height: 45,
+                //         decoration: BoxDecoration(
+                //           borderRadius: BorderRadius.circular(22.5),
+                //           color: AppColors.whitedColor,
+                //         ),
+                //         child: SvgPicture.asset(
+                //           "assets/svg/save.svg",
+                //           height: 17,
+                //           color: AppColors.primaryColor,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -351,32 +376,234 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
 
       body: Column(
         children: <Widget>[
-          Expanded(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return DrawingBoard(
-                  controller: _drawingController,
-                  background: Container(
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
-                    color: Colors.white,
-                  ),
-                  showDefaultActions: true,
-                  showDefaultTools: true,
-                  defaultToolsBuilder: (Type t, _) {
-                    return DrawingBoard.defaultTools(t, _drawingController)
-                      ..insert(
-                        1,
-                        DefToolItem(
-                          icon: Icons.change_history_rounded,
-                          isActive: t == Triangle,
-                        ),
-                      );
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () {
+                    _drawingController.undo();
                   },
-                );
-              },
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(22.5),
+                            color: AppColors.primaryColor),
+                        child: SvgPicture.asset(
+                          "assets/svg/eraser.svg",
+                          height: 16,
+                        ),
+                        //  Image.asset("assets/images/redo.png"),
+                      ),
+                      const Text(
+                        "Redo",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _drawingController.redo();
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.5),
+                          color: AppColors.primaryColor,
+                        ),
+                        child: SvgPicture.asset(
+                          "assets/svg/undo.svg",
+                          height: 17,
+                          color: AppColors.whitedColor,
+                        ),
+                      ),
+                      const Text(
+                        "Undo",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _drawingController.clear();
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.5),
+                          color: AppColors.primaryColor,
+                        ),
+                        child: SvgPicture.asset(
+                          "assets/svg/clear.svg",
+                          height: 17,
+                          color: AppColors.whitedColor,
+                        ),
+                      ),
+                      const Text(
+                        "Clear",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {},
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.5),
+                          color: AppColors.primaryColor,
+                        ),
+                        child: SvgPicture.asset(
+                          "assets/svg/colorfilter.svg",
+                          height: 17,
+                        ),
+                      ),
+                      const Text(
+                        "Pen",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    sendDrawingData();
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22.5),
+                          color: AppColors.primaryColor,
+                        ),
+                        child: SvgPicture.asset(
+                          "assets/svg/save.svg",
+                          height: 17,
+                          color: AppColors.whitedColor,
+                        ),
+                      ),
+                      const Text(
+                        "Save",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+          isLoading
+              ? const SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: SpinKitFadingCircle(
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                )
+              : Expanded(
+                  child: Stack(
+                    children: [
+                      LayoutBuilder(
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
+                          return DrawingBoard(
+                            controller: _drawingController,
+                            background: Container(
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight,
+                              color: Colors.white,
+                            ),
+                            // showDefaultActions: true,
+                            showDefaultTools: true,
+                            // defaultToolsBuilder: (Type t, _) {
+                            //   return DrawingBoard.defaultTools(
+                            //       t, _drawingController)
+                            //     ..insert(
+                            //       1,
+                            //       DefToolItem(
+                            //         icon: Icons.change_history_rounded,
+                            //         isActive: t == Triangle,
+                            //       ),
+                            //     );
+                            // },
+                          );
+                        },
+                      ),
+                      Positioned(
+                        top: 20,
+                        right: 10,
+                        child: SizedBox(
+                          height:
+                              300, // Set the height to adjust the length of the vertical slider
+                          width:
+                              24, // Set the width to adjust the thickness of the vertical slider
+                          child: ExValueBuilder<DrawConfig>(
+                            valueListenable: _drawingController.drawConfig,
+                            shouldRebuild: (DrawConfig p, DrawConfig n) =>
+                                p.strokeWidth != n.strokeWidth,
+                            builder: (_, DrawConfig dc, ___) {
+                              return RotatedBox(
+                                quarterTurns:
+                                    3, // Rotate the Slider 270 degrees (3 quarter-turns) for vertical orientation
+                                child: Slider(
+                                  value: dc.strokeWidth,
+                                  max: 50,
+                                  min: 1,
+                                  onChanged: (double v) => _drawingController
+                                      .setStyle(strokeWidth: v),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         ],
       ),
     );

@@ -16,12 +16,6 @@ import 'package:measurment_app/view/drawing_room/presentation/drawing_room_scree
 import 'package:measurment_app/view/drawing_room/presentation/edit_drawing_room.dart';
 import 'package:provider/provider.dart';
 
-import '../drawing_room/model/drawing_point.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/services.dart';
@@ -92,6 +86,42 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
           );
         },
       );
+    }
+  }
+
+// Function to extract valid JSON string
+  String extractValidJsonString(String jsonString) {
+    // Find the first instance of '{' and its index
+    int startIndex = jsonString.indexOf('{');
+
+    if (startIndex == -1) {
+      // No opening brace found, return an empty JSON object or handle the error as needed
+      return '{}';
+    }
+
+    // Remove everything before the opening brace
+    return jsonString.substring(startIndex);
+  }
+
+  tryToCorrectJson(String jsonString) {
+    int openingBraceCount = jsonString.split('{').length - 1;
+    int closingBraceCount = jsonString.split('}').length - 1;
+
+    // If there are more opening braces than closing braces, add the missing closing braces
+    while (openingBraceCount > closingBraceCount) {
+      jsonString += '}';
+      closingBraceCount++;
+    }
+
+    isJsonValid(jsonString);
+  }
+
+  isJsonValid(String jsonString) {
+    try {
+      jsonDecode(jsonString);
+      print("Return valid json");
+    } catch (e) {
+      print("Return un valid json");
     }
   }
 
@@ -235,7 +265,10 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                         )),
                       );
                     } else if (snapshot.hasError) {
-                      return const Center(child: Text('Nothing Found'));
+                      return const Padding(
+                        padding: EdgeInsets.only(top: 100),
+                        child: Center(child: Text('Nothing Found')),
+                      );
                     } else {
                       filteredProductsList = snapshot.data!;
 
@@ -446,44 +479,101 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                         children: [
                                           InkWell(
                                             onTap: () async {
-                                              final List<Map<String, dynamic>>
-                                                  drawingData =
-                                                  await (jsonDecode(
-                                                              filteredProductsList[
-                                                                      index]
-                                                                  .canvasPoints
-                                                                  .toString())
-                                                          as List<dynamic>)
-                                                      .map((element) => element
-                                                          as Map<String,
-                                                              dynamic>)
-                                                      .toList();
-                                              log("List Data==>${drawingData}");
-                                              // ignore: use_build_context_synchronously
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      EditDrawingRoomScreen(
-                                                    id: filteredProductsList[
-                                                            index]
-                                                        .id
-                                                        .toString(),
-                                                    product:
-                                                        filteredProductsList[
-                                                                index]
-                                                            .measurementProduct!
-                                                            .name
-                                                            .toString(),
-                                                    description:
-                                                        filteredProductsList[
-                                                                index]
-                                                            .description
-                                                            .toString(),
-                                                    drawingData: drawingData,
+                                              print("Enter into decode");
+
+// extra method
+
+                                              // /try catch
+                                              try {
+                                                final List<Map<String, dynamic>>
+                                                    drawingData = (jsonDecode(
+                                                                filteredProductsList[
+                                                                        index]
+                                                                    .canvasPoints
+                                                                    .toString())
+                                                            as List<dynamic>)
+                                                        .map((element) =>
+                                                            element as Map<
+                                                                String,
+                                                                dynamic>)
+                                                        .toList();
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditDrawingRoomScreen(
+                                                      id: filteredProductsList[
+                                                              index]
+                                                          .id
+                                                          .toString(),
+                                                      product:
+                                                          filteredProductsList[
+                                                                  index]
+                                                              .measurementProduct!
+                                                              .name
+                                                              .toString(),
+                                                      description:
+                                                          filteredProductsList[
+                                                                  index]
+                                                              .description
+                                                              .toString(),
+                                                      drawingData: drawingData,
+                                                    ),
                                                   ),
-                                                ),
-                                              );
+                                                );
+                                                // log("List Data==>${drawingData}");
+
+                                                // Continue processing the drawingData if parsing is successful
+                                              } catch (e) {
+                                                // final List<Map<String, dynamic>>
+                                                //     drawingData = (jsonDecode(
+                                                //                 filteredProductsList[
+                                                //                         index]
+                                                //                     .canvasPoints
+                                                //                     .toString())
+                                                //             as List<dynamic>)
+                                                //         .map((element) =>
+                                                //             element as Map<
+                                                //                 String,
+                                                //                 dynamic>)
+                                                //         .toList();
+                                                // await tryToCorrectJson(
+                                                //     filteredProductsList[index]
+                                                //         .canvasPoints
+                                                //         .toString()
+                                                //         .toString());
+
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                  content: const Text(
+                                                      "Loading Record Try after a while."),
+                                                  backgroundColor:
+                                                      Colors.red.shade400,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  duration: const Duration(
+                                                      seconds: 1),
+                                                ));
+                                                // Handle the exception, e.g., log an error or provide a fallback value
+                                                print('Error parsing JSON: $e');
+                                                // You can also provide a default value or handle the error in a way that makes sense for your app
+                                              }
+
+                                              ///my method
+                                              // final List<Map<String, dynamic>>
+                                              //     drawingData =
+                                              //     await (jsonDecode(
+                                              //                 filteredProductsList[
+                                              //                         index]
+                                              //                     .canvasPoints
+                                              //                     .toString())
+                                              //             as List<dynamic>)
+                                              //         .map((element) => element
+                                              //             as Map<String,
+                                              //                 dynamic>)
+                                              //         .toList();
+
+                                              // ignore: use_build_context_synchronously
                                             },
                                             child: Container(
                                               alignment: Alignment.center,
@@ -588,8 +678,8 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            height: 350,
-            width: 500,
+            height: MediaQuery.of(context).size.height * 0.8,
+            width: MediaQuery.of(context).size.height * 0.8,
             margin: const EdgeInsets.symmetric(
               horizontal: 30,
             ),
@@ -597,8 +687,29 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: Center(
-              child: Image.memory(imageBytes),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Image.memory(imageBytes),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -672,7 +783,7 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            height: 200,
+            height: 300,
             margin: const EdgeInsets.symmetric(
               horizontal: 30,
             ),
