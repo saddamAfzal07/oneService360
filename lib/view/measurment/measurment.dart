@@ -783,7 +783,7 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            height: 300,
+            height: MediaQuery.of(context).size.height * 0.3,
             margin: const EdgeInsets.symmetric(
               horizontal: 30,
             ),

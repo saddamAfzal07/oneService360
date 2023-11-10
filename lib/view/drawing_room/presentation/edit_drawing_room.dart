@@ -377,13 +377,15 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
       body: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
                   onTap: () {
-                    _drawingController.undo();
+                    // _drawingController.undo();
+                    _drawingController
+                        .setPaintContent(Eraser(color: Colors.white));
                   },
                   child: Column(
                     children: [
@@ -401,7 +403,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                         //  Image.asset("assets/images/redo.png"),
                       ),
                       const Text(
-                        "Redo",
+                        "Eraser",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -474,7 +476,9 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    _drawingController.setPaintContent(SimpleLine());
+                  },
                   child: Column(
                     children: [
                       Container(
@@ -551,6 +555,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                         builder:
                             (BuildContext context, BoxConstraints constraints) {
                           return DrawingBoard(
+                            // colorValue: Colors.green,
                             controller: _drawingController,
                             background: Container(
                               width: constraints.maxWidth,
@@ -558,7 +563,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                               color: Colors.white,
                             ),
                             // showDefaultActions: true,
-                            showDefaultTools: true,
+                            // showDefaultTools: true,
                             // defaultToolsBuilder: (Type t, _) {
                             //   return DrawingBoard.defaultTools(
                             //       t, _drawingController)
