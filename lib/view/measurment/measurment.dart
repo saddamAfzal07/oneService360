@@ -12,6 +12,7 @@ import 'package:measurment_app/model/get_measurnments.dart';
 import 'package:measurment_app/res/constant/colors.dart';
 import 'package:measurment_app/utils/custom_appbar.dart';
 import 'package:measurment_app/utils/fading_circular_indicator.dart';
+import 'package:measurment_app/view/dialogue/image_detail.dart';
 import 'package:measurment_app/view/drawing_room/presentation/drawing_room_screen.dart';
 import 'package:measurment_app/view/drawing_room/presentation/edit_drawing_room.dart';
 import 'package:provider/provider.dart';
@@ -362,15 +363,14 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                               log("List Data==>${drawingData}");
 
                                               ///show image
-                                              List<Map<String, dynamic>>
-                                                  simplifiedDrawingData =
-                                                  drawingData.where((data) {
-                                                return data['type'] ==
-                                                    'SimpleLine';
-                                              }).toList();
+                                              // List<Map<String, dynamic>>
+                                              //     simplifiedDrawingData =
+                                              //     drawingData.where((data) {
+                                              //   return data['type'] ==
+                                              //       'SimpleLine';
+                                              // }).toList();
 
-                                              imagePreviewDialog(
-                                                  simplifiedDrawingData);
+                                              imagePreviewDialog(drawingData);
                                             },
                                             child: const Center(
                                               child:
@@ -670,49 +670,66 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
   }
 
   Future<void> imagePreviewDialog(
-      List<Map<String, dynamic>> drawingData) async {
+    List<Map<String, dynamic>> drawingData,
+  ) async {
     final Uint8List imageBytes = convertDrawingToImage(drawingData);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.8,
-            width: MediaQuery.of(context).size.height * 0.8,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 30,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Center(
-                      child: Image.memory(imageBytes),
-                    ),
-                  ],
-                ),
-              ],
+        return Padding(
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 30,
+            bottom: 30,
+          ),
+          child: SizedBox(
+            height: 300,
+            width: 500,
+            child: ImageRoomScreen(
+              drawingData: drawingData,
             ),
           ),
         );
+
+        // Center(
+        //   child: Container(
+        //     height: MediaQuery.of(context).size.height * 0.8,
+        //     width: MediaQuery.of(context).size.height * 0.8,
+        //     margin: const EdgeInsets.symmetric(
+        //       horizontal: 30,
+        //     ),
+        //     decoration: BoxDecoration(
+        //       color: Colors.white,
+        //       borderRadius: BorderRadius.circular(8.0),
+        //     ),
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.start,
+        //       children: [
+        //         Row(
+        //           mainAxisAlignment: MainAxisAlignment.end,
+        //           children: [
+        //             IconButton(
+        //               icon: const Icon(Icons.close),
+        //               onPressed: () {
+        //                 Navigator.of(context).pop();
+        //               },
+        //             ),
+        //           ],
+        //         ),
+        //         Column(
+        //           mainAxisAlignment: MainAxisAlignment.center,
+        //           children: [
+        //             Center(
+        //               child: Image.memory(imageBytes),
+        //             ),
+        //           ],
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // );
       },
     );
   }

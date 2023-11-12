@@ -105,7 +105,7 @@ class Triangle extends PaintContent {
 
 //
   Paint blackPencil = Paint()
-    ..color = Color(0xFF000000) // Set the color to black
+    ..color = Color(0xFF000000)
     ..strokeWidth = 4.0;
   //
   @override
@@ -372,7 +372,6 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                 children: [
                   InkWell(
                     onTap: () {
-                      // _drawingController.undo();
                       _drawingController
                           .setPaintContent(Eraser(color: Colors.white));
                     },
@@ -404,7 +403,7 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      _drawingController.redo();
+                      _drawingController.undo();
                     },
                     child: Column(
                       children: [
@@ -531,31 +530,28 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      return DrawingBoard(
-                        // colorValue: Colors.green,
-                        controller: _drawingController,
-                        background: Container(
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
-                          color: Colors.white,
-                        ),
-                        // showDefaultActions: true,
-                        // showDefaultTools: true,
-                        defaultToolsBuilder: (Type t, _) {
-                          return DrawingBoard.defaultTools(
-                              t, _drawingController)
-                            ..insert(
-                              1,
-                              DefToolItem(
-                                icon: Icons.change_history_rounded,
-                                isActive: t == Triangle,
-                              ),
-                            );
-                        },
-                      );
+                  DrawingBoard(
+                    // maxScale: 20.0,
+                    // minScale: 0.2,
+                    // colorValue: Colors.green,
+                    controller: _drawingController,
+                    background: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      // width: constraints.maxWidth,
+                      // height: constraints.maxHeight,
+                      color: Colors.white,
+                    ),
+
+                    defaultToolsBuilder: (Type t, _) {
+                      return DrawingBoard.defaultTools(t, _drawingController)
+                        ..insert(
+                          1,
+                          DefToolItem(
+                            icon: Icons.change_history_rounded,
+                            isActive: t == Triangle,
+                          ),
+                        );
                     },
                   ),
                   Positioned(

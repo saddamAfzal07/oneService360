@@ -415,7 +415,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    _drawingController.redo();
+                    _drawingController.undo();
                   },
                   child: Column(
                     children: [
@@ -551,33 +551,38 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
               : Expanded(
                   child: Stack(
                     children: [
-                      LayoutBuilder(
-                        builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                          return DrawingBoard(
-                            // colorValue: Colors.green,
-                            controller: _drawingController,
-                            background: Container(
-                              width: constraints.maxWidth,
-                              height: constraints.maxHeight,
-                              color: Colors.white,
-                            ),
-                            // showDefaultActions: true,
-                            // showDefaultTools: true,
-                            // defaultToolsBuilder: (Type t, _) {
-                            //   return DrawingBoard.defaultTools(
-                            //       t, _drawingController)
-                            //     ..insert(
-                            //       1,
-                            //       DefToolItem(
-                            //         icon: Icons.change_history_rounded,
-                            //         isActive: t == Triangle,
-                            //       ),
-                            //     );
-                            // },
-                          );
-                        },
+                      // LayoutBuilder(
+                      //   builder:
+                      //       (BuildContext context, BoxConstraints constraints) {
+                      //     return
+
+                      DrawingBoard(
+                        // colorValue: Colors.green,
+                        controller: _drawingController,
+                        background: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          // width: constraints.maxWidth,
+                          // height: constraints.maxHeight,
+                          color: Colors.white,
+                          clipBehavior: Clip.none,
+                        ),
+                        // showDefaultActions: true,
+                        // showDefaultTools: true,
+                        // defaultToolsBuilder: (Type t, _) {
+                        //   return DrawingBoard.defaultTools(
+                        //       t, _drawingController)
+                        //     ..insert(
+                        //       1,
+                        //       DefToolItem(
+                        //         icon: Icons.change_history_rounded,
+                        //         isActive: t == Triangle,
+                        //       ),
+                        //     );
+                        // },
                       ),
+                      //   },
+                      // ),
                       Positioned(
                         top: 20,
                         right: 10,
