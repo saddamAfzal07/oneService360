@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -293,6 +294,9 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
     });
   }
 
+//
+  List availableColors = ['black', 'red', 'blue', 'green'];
+  Color selectedColor = Colors.black;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -383,18 +387,17 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
               children: [
                 InkWell(
                   onTap: () {
-                    // _drawingController.undo();
-                    _drawingController
-                        .setPaintContent(Eraser(color: Colors.white));
+                    _drawingController.setPaintContent(SimpleLine());
+                    _drawingController.setCustomColor(Colors.white);
                   },
                   child: Column(
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(22.5),
+                            borderRadius: BorderRadius.circular(27),
                             color: AppColors.primaryColor),
                         child: SvgPicture.asset(
                           "assets/svg/eraser.svg",
@@ -421,15 +424,15 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.5),
+                          borderRadius: BorderRadius.circular(27),
                           color: AppColors.primaryColor,
                         ),
                         child: SvgPicture.asset(
                           "assets/svg/undo.svg",
-                          height: 17,
+                          height: 20,
                           color: AppColors.whitedColor,
                         ),
                       ),
@@ -452,15 +455,15 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.5),
+                          borderRadius: BorderRadius.circular(27),
                           color: AppColors.primaryColor,
                         ),
                         child: SvgPicture.asset(
                           "assets/svg/clear.svg",
-                          height: 17,
+                          height: 20,
                           color: AppColors.whitedColor,
                         ),
                       ),
@@ -475,23 +478,123 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     ],
                   ),
                 ),
+                // InkWell(
+                //   onTap: () {
+                //     _drawingController.setPaintContent(SimpleLine());
+                //   },
+                //   child: Column(
+                //     children: [
+                //       Container(
+                //         alignment: Alignment.center,
+                //         width: 45,
+                //         height: 45,
+                //         decoration: BoxDecoration(
+                //           borderRadius: BorderRadius.circular(22.5),
+                //           color: AppColors.primaryColor,
+                //         ),
+                //         child: SvgPicture.asset(
+                //           "assets/svg/colorfilter.svg",
+                //           height: 17,
+                //         ),
+                //       ),
+                //       const Text(
+                //         "Pen",
+                //         style: TextStyle(
+                //           fontSize: 16,
+                //           fontWeight: FontWeight.w500,
+                //           color: AppColors.primaryColor,
+                //         ),
+                //       )
+                //     ],
+                //   ),
+                // ),
+
                 InkWell(
                   onTap: () {
                     _drawingController.setPaintContent(SimpleLine());
+                    _drawingController.setCustomColor(Colors.black);
+                    print("click");
                   },
                   child: Column(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.5),
-                          color: AppColors.primaryColor,
-                        ),
-                        child: SvgPicture.asset(
-                          "assets/svg/colorfilter.svg",
-                          height: 17,
+                      // Container(
+                      //   alignment: Alignment.center,
+                      //   width: 45,
+                      //   height: 45,
+                      //   decoration: BoxDecoration(
+                      //     borderRadius: BorderRadius.circular(22.5),
+                      //     color: AppColors.primaryColor,
+                      //   ),
+                      //   child: SvgPicture.asset(
+                      //     "assets/svg/colorfilter.svg",
+                      //     height: 17,
+                      //   ),
+                      // ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton2(
+                          customButton: Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(13),
+
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(27),
+                              color: AppColors.primaryColor,
+                            ),
+                            // decoration: BoxDecoration(
+                            //   color: selectedColor == Colors.white
+                            //       ? Colors.black
+                            //       : selectedColor == Colors.red
+                            //           ? Colors.red
+                            //           : selectedColor == Colors.blue
+                            //               ? Colors.blue
+                            //               : Colors.purple.shade200,
+                            //   shape: BoxShape.circle,
+                            // ),
+                            child: SvgPicture.asset(
+                              "assets/svg/colorfilter.svg",
+                              height: 20,
+                            ),
+                          ),
+                          items: availableColors
+                              .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        color: item == 'black'
+                                            ? Colors.black
+                                            : item == "green"
+                                                ? Colors.green
+                                                : item == 'red'
+                                                    ? Colors.red
+                                                    : Colors.blue,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      foregroundDecoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value.toString() == "red") {
+                                _drawingController.setCustomColor(Colors.red);
+                              } else if (value.toString() == "blue") {
+                                _drawingController.setCustomColor(Colors.blue);
+                              } else if (value.toString() == "green") {
+                                _drawingController.setCustomColor(Colors.green);
+                              } else {
+                                _drawingController.setCustomColor(Colors.black);
+                              }
+                            });
+                            setState(() {
+                              _drawingController.setPaintContent(SimpleLine());
+                            });
+                          },
                         ),
                       ),
                       const Text(
@@ -505,6 +608,7 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     ],
                   ),
                 ),
+
                 InkWell(
                   onTap: () {
                     sendDrawingData();
@@ -513,15 +617,15 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 45,
-                        height: 45,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(22.5),
+                          borderRadius: BorderRadius.circular(28),
                           color: AppColors.primaryColor,
                         ),
                         child: SvgPicture.asset(
                           "assets/svg/save.svg",
-                          height: 17,
+                          height: 20,
                           color: AppColors.whitedColor,
                         ),
                       ),

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
 import 'package:flutter_drawing_board/helpers.dart';
 import 'package:flutter_drawing_board/paint_contents.dart';
@@ -267,6 +269,81 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
     });
   }
 
+  Color _selectedColor = Colors.black; // Initial color
+
+  // Future<void> _showColorPickerDialog() async {
+  //   Color? pickedColor = await showDialog<Color>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Pick a color'),
+  //         content: SingleChildScrollView(
+  //           child: ColorPicker(
+  //             pickerColor: _selectedColor,
+  //             onColorChanged: (Color color) {
+  //               setState(() {
+  //                 _selectedColor = color;
+  //               });
+  //             },
+  //             showLabel: true,
+  //             pickerAreaHeightPercent: 0.8,
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('OK'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop(_selectedColor);
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+
+  //   if (pickedColor != null) {
+  //     _drawingController.setCustomColor(pickedColor);
+  //   }
+  // }
+
+  List<Color> _colorList = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.yellow,
+    Colors.orange,
+    Colors.purple,
+    Colors.pink,
+    Colors.teal,
+  ];
+
+  void showColorPickerDropdown(BuildContext context) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(0, 0, 0, 0),
+      items: _colorList.map((Color color) {
+        return PopupMenuItem<Color>(
+          value: color,
+          child: Container(
+            width: 50,
+            height: 50,
+            color: color,
+          ),
+        );
+      }).toList(),
+    ).then((selectedColor) {
+      if (selectedColor != null) {
+        setState(() {
+          _selectedColor = selectedColor;
+          _drawingController.setCustomColor(_selectedColor);
+        });
+      }
+    });
+  }
+
+  //
+  List availableColors = ['black', 'red', 'blue', 'green'];
+  Color selectedColor = Colors.black;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -310,7 +387,7 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                     color: AppColors.whitedColor,
                   ),
                 ),
-                SizedBox(),
+                const SizedBox(),
                 // InkWell(
                 //   onTap: () {
                 //     sendDrawingData();
@@ -370,23 +447,37 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // ElevatedButton(
+                  //   onPressed: _showColorPickerDialog,
+                  //   child: Text('Pick Color'),
+                  // ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // Show the color picker dropdown
+                  //     showColorPickerDropdown(context);
+                  //   },
+                  //   child: Text('Pick Color'),
+                  // ),
+
                   InkWell(
                     onTap: () {
-                      _drawingController
-                          .setPaintContent(Eraser(color: Colors.white));
+                      // _drawingController
+                      //     .setPaintContent(Eraser(color: Colors.white));
+                      _drawingController.setPaintContent(SimpleLine());
+                      _drawingController.setCustomColor(Colors.white);
                     },
                     child: Column(
                       children: [
                         Container(
                           alignment: Alignment.center,
-                          width: 45,
-                          height: 45,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(22.5),
+                              borderRadius: BorderRadius.circular(27),
                               color: AppColors.primaryColor),
                           child: SvgPicture.asset(
                             "assets/svg/eraser.svg",
-                            height: 16,
+                            height: 20,
                           ),
                           //  Image.asset("assets/images/redo.png"),
                         ),
@@ -409,15 +500,15 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                       children: [
                         Container(
                           alignment: Alignment.center,
-                          width: 45,
-                          height: 45,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(22.5),
+                            borderRadius: BorderRadius.circular(27),
                             color: AppColors.primaryColor,
                           ),
                           child: SvgPicture.asset(
                             "assets/svg/undo.svg",
-                            height: 17,
+                            height: 20,
                             color: AppColors.whitedColor,
                           ),
                         ),
@@ -440,15 +531,15 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                       children: [
                         Container(
                           alignment: Alignment.center,
-                          width: 45,
-                          height: 45,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(22.5),
+                            borderRadius: BorderRadius.circular(27),
                             color: AppColors.primaryColor,
                           ),
                           child: SvgPicture.asset(
                             "assets/svg/clear.svg",
-                            height: 17,
+                            height: 20,
                             color: AppColors.whitedColor,
                           ),
                         ),
@@ -466,22 +557,96 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                   InkWell(
                     onTap: () {
                       _drawingController.setPaintContent(SimpleLine());
+                      _drawingController.setCustomColor(Colors.black);
                     },
                     child: Column(
                       children: [
-                        Container(
-                          alignment: Alignment.center,
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(22.5),
-                            color: AppColors.primaryColor,
-                          ),
-                          child: SvgPicture.asset(
-                            "assets/svg/colorfilter.svg",
-                            height: 17,
+                        // Container(
+                        //   alignment: Alignment.center,
+                        //   width: 45,
+                        //   height: 45,
+                        //   decoration: BoxDecoration(
+                        //     borderRadius: BorderRadius.circular(22.5),
+                        //     color: AppColors.primaryColor,
+                        //   ),
+                        //   child: SvgPicture.asset(
+                        //     "assets/svg/colorfilter.svg",
+                        //     height: 17,
+                        //   ),
+                        // ),
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton2(
+                            customButton: Container(
+                              alignment: Alignment.center,
+                              // padding: const EdgeInsets.all(13),
+
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(27),
+                                color: AppColors.primaryColor,
+                              ),
+                              // decoration: BoxDecoration(
+                              //   color: selectedColor == Colors.white
+                              //       ? Colors.black
+                              //       : selectedColor == Colors.red
+                              //           ? Colors.red
+                              //           : selectedColor == Colors.blue
+                              //               ? Colors.blue
+                              //               : Colors.purple.shade200,
+                              //   shape: BoxShape.circle,
+                              // ),
+                              child: SvgPicture.asset(
+                                "assets/svg/colorfilter.svg",
+                                height: 20,
+                              ),
+                            ),
+                            items: availableColors
+                                .map((item) => DropdownMenuItem<String>(
+                                      value: item,
+                                      child: Container(
+                                        width: 200,
+                                        height: 400,
+                                        decoration: BoxDecoration(
+                                          color: item == 'black'
+                                              ? Colors.black
+                                              : item == "green"
+                                                  ? Colors.green
+                                                  : item == 'red'
+                                                      ? Colors.red
+                                                      : Colors.blue,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        foregroundDecoration:
+                                            const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                if (value.toString() == "red") {
+                                  _drawingController.setCustomColor(Colors.red);
+                                } else if (value.toString() == "blue") {
+                                  _drawingController
+                                      .setCustomColor(Colors.blue);
+                                } else if (value.toString() == "green") {
+                                  _drawingController
+                                      .setCustomColor(Colors.green);
+                                } else {
+                                  _drawingController
+                                      .setCustomColor(Colors.black);
+                                }
+                              });
+                              setState(() {
+                                _drawingController
+                                    .setPaintContent(SimpleLine());
+                              });
+                            },
                           ),
                         ),
+
                         const Text(
                           "Pen",
                           style: TextStyle(
@@ -501,15 +666,15 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                       children: [
                         Container(
                           alignment: Alignment.center,
-                          width: 45,
-                          height: 45,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(22.5),
+                            borderRadius: BorderRadius.circular(27),
                             color: AppColors.primaryColor,
                           ),
                           child: SvgPicture.asset(
                             "assets/svg/save.svg",
-                            height: 17,
+                            height: 20,
                             color: AppColors.whitedColor,
                           ),
                         ),

@@ -293,29 +293,6 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                         shrinkWrap: true,
                         itemCount: filteredProductsList.length,
                         itemBuilder: (context, index) {
-                          // final List<Map<String, dynamic>> drawingData =
-                          //     (jsonDecode(filteredProductsList[index]
-                          //             .canvasPoints
-                          //             .toString()) as List<dynamic>)
-                          //         .map((element) =>
-                          //             element as Map<String, dynamic>)
-                          //         .toList();
-                          // log("List Data==>${drawingData}");
-                          // List<DrawingPoint> drawingPoints =
-                          //     convertOffsetsToDrawingPoints(
-                          //   parsePointsString(
-                          //     filteredProductsList[index]
-                          //         .canvasPoints
-                          //         .toString(),
-                          //   ),
-                          //   AppColors.blackColor,
-                          //   5.0,
-                          // );
-                          // final image = createImageFromOffsets(
-                          //     filteredProductsList[index]
-                          //         .canvasPoints
-                          //         .toString());
-
                           return Column(
                             children: [
                               Card(
@@ -362,25 +339,10 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                                       .toList();
                                               log("List Data==>${drawingData}");
 
-                                              ///show image
-                                              // List<Map<String, dynamic>>
-                                              //     simplifiedDrawingData =
-                                              //     drawingData.where((data) {
-                                              //   return data['type'] ==
-                                              //       'SimpleLine';
-                                              // }).toList();
-
                                               imagePreviewDialog(drawingData);
                                             },
                                             child: const Center(
-                                              child:
-                                                  //  CustomPaint(
-                                                  //   size: Size(2, 2),
-                                                  //   painter:
-                                                  //       DrawingPainter(drawingData),
-                                                  // ),
-
-                                                  Text(
+                                              child: Text(
                                                 "Measurements\n     Details",
                                                 style: TextStyle(fontSize: 6),
                                               ),
@@ -521,28 +483,7 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                                     ),
                                                   ),
                                                 );
-                                                // log("List Data==>${drawingData}");
-
-                                                // Continue processing the drawingData if parsing is successful
                                               } catch (e) {
-                                                // final List<Map<String, dynamic>>
-                                                //     drawingData = (jsonDecode(
-                                                //                 filteredProductsList[
-                                                //                         index]
-                                                //                     .canvasPoints
-                                                //                     .toString())
-                                                //             as List<dynamic>)
-                                                //         .map((element) =>
-                                                //             element as Map<
-                                                //                 String,
-                                                //                 dynamic>)
-                                                //         .toList();
-                                                // await tryToCorrectJson(
-                                                //     filteredProductsList[index]
-                                                //         .canvasPoints
-                                                //         .toString()
-                                                //         .toString());
-
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(SnackBar(
                                                   content: const Text(
@@ -558,22 +499,6 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
                                                 print('Error parsing JSON: $e');
                                                 // You can also provide a default value or handle the error in a way that makes sense for your app
                                               }
-
-                                              ///my method
-                                              // final List<Map<String, dynamic>>
-                                              //     drawingData =
-                                              //     await (jsonDecode(
-                                              //                 filteredProductsList[
-                                              //                         index]
-                                              //                     .canvasPoints
-                                              //                     .toString())
-                                              //             as List<dynamic>)
-                                              //         .map((element) => element
-                                              //             as Map<String,
-                                              //                 dynamic>)
-                                              //         .toList();
-
-                                              // ignore: use_build_context_synchronously
                                             },
                                             child: Container(
                                               alignment: Alignment.center,
@@ -692,44 +617,6 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
             ),
           ),
         );
-
-        // Center(
-        //   child: Container(
-        //     height: MediaQuery.of(context).size.height * 0.8,
-        //     width: MediaQuery.of(context).size.height * 0.8,
-        //     margin: const EdgeInsets.symmetric(
-        //       horizontal: 30,
-        //     ),
-        //     decoration: BoxDecoration(
-        //       color: Colors.white,
-        //       borderRadius: BorderRadius.circular(8.0),
-        //     ),
-        //     child: Column(
-        //       mainAxisAlignment: MainAxisAlignment.start,
-        //       children: [
-        //         Row(
-        //           mainAxisAlignment: MainAxisAlignment.end,
-        //           children: [
-        //             IconButton(
-        //               icon: const Icon(Icons.close),
-        //               onPressed: () {
-        //                 Navigator.of(context).pop();
-        //               },
-        //             ),
-        //           ],
-        //         ),
-        //         Column(
-        //           mainAxisAlignment: MainAxisAlignment.center,
-        //           children: [
-        //             Center(
-        //               child: Image.memory(imageBytes),
-        //             ),
-        //           ],
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // );
       },
     );
   }
