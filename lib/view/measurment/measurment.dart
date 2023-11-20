@@ -609,11 +609,16 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
             top: 30,
             bottom: 30,
           ),
-          child: SizedBox(
-            height: 300,
-            width: 500,
-            child: ImageRoomScreen(
-              drawingData: drawingData,
+          child: InteractiveViewer(
+            panEnabled: false,
+            minScale: 0.5,
+            maxScale: 4,
+            child: SizedBox(
+              height: 300,
+              width: 500,
+              child: ImageRoomScreen(
+                drawingData: drawingData,
+              ),
             ),
           ),
         );

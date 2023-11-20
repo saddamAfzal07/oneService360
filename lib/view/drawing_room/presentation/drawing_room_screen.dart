@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -18,6 +19,7 @@ import 'package:measurment_app/view/measurment/add_measurnment.dart';
 import 'package:measurment_app/view/measurment/measurment.dart';
 
 import 'test_data.dart';
+import 'package:flutter/services.dart';
 
 const Map<String, dynamic> _testLine1 = <String, dynamic>{
   'type': 'StraightLine',
@@ -344,6 +346,40 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
   //
   List availableColors = ['black', 'red', 'blue', 'green'];
   Color selectedColor = Colors.black;
+
+  //Slider
+  double sliderValue = 20.0;
+
+  //Pen
+  bool _isPen(PointerEvent event) {
+    return event.kind == PointerDeviceKind.stylus;
+  }
+
+  void _handlePointerDown(PointerEvent event) {
+    if (!_isPen(event)) {
+      return;
+    }
+    // Handle pen down event
+    print('Pen down at ${event.position}');
+  }
+
+  void _handlePointerMove(PointerEvent event) {
+    if (!_isPen(event)) {
+      return;
+    }
+    // Handle pen move event
+    print('Pen move to ${event.position}');
+  }
+
+  void _handlePointerUp(PointerEvent event) {
+    if (!_isPen(event)) {
+      return;
+    }
+    // Handle pen up event
+    print('Pen up at ${event.position}');
+  }
+
+  bool isTwoFingers = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -388,48 +424,11 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                   ),
                 ),
                 const SizedBox(),
-                // InkWell(
-                //   onTap: () {
-                //     sendDrawingData();
-                //   },
-                //   child: Column(
-                //     mainAxisAlignment: MainAxisAlignment.end,
-                //     children: [
-                //       Container(
-                //         alignment: Alignment.center,
-                //         width: 45,
-                //         height: 45,
-                //         decoration: BoxDecoration(
-                //           borderRadius: BorderRadius.circular(22.5),
-                //           color: AppColors.whitedColor,
-                //         ),
-                //         child: SvgPicture.asset(
-                //           "assets/svg/save.svg",
-                //           height: 17,
-                //           color: AppColors.primaryColor,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ),
         ),
       ),
-
-      //  AppBar(
-      //   title: const Text('Drawing Test'),
-      //   systemOverlayStyle: SystemUiOverlayStyle.light,
-      //   actions: <Widget>[
-      //     IconButton(
-      //         icon: const Icon(Icons.line_axis), onPressed: _addTestLine),
-      //     IconButton(
-      //         icon: const Icon(Icons.javascript_outlined), onPressed: _getJson),
-      //     IconButton(icon: const Icon(Icons.check), onPressed: _getImageData),
-      //     IconButton(icon: const Icon(Icons.send), onPressed: sendDrawingData),
-      //   ],
-      // ),
       body: WillPopScope(
         onWillPop: () async {
           Navigator.pushReplacement(
@@ -447,24 +446,16 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // ElevatedButton(
-                  //   onPressed: _showColorPickerDialog,
-                  //   child: Text('Pick Color'),
-                  // ),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     // Show the color picker dropdown
-                  //     showColorPickerDropdown(context);
-                  //   },
-                  //   child: Text('Pick Color'),
-                  // ),
-
                   InkWell(
                     onTap: () {
                       // _drawingController
                       //     .setPaintContent(Eraser(color: Colors.white));
                       _drawingController.setPaintContent(SimpleLine());
                       _drawingController.setCustomColor(Colors.white);
+                      _drawingController.setStyle(strokeWidth: 25.0);
+
+                      sliderValue = 25.0;
+                      setState(() {});
                     },
                     child: Column(
                       children: [
@@ -561,19 +552,6 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                     },
                     child: Column(
                       children: [
-                        // Container(
-                        //   alignment: Alignment.center,
-                        //   width: 45,
-                        //   height: 45,
-                        //   decoration: BoxDecoration(
-                        //     borderRadius: BorderRadius.circular(22.5),
-                        //     color: AppColors.primaryColor,
-                        //   ),
-                        //   child: SvgPicture.asset(
-                        //     "assets/svg/colorfilter.svg",
-                        //     height: 17,
-                        //   ),
-                        // ),
                         DropdownButtonHideUnderline(
                           child: DropdownButton2(
                             customButton: Container(
@@ -586,16 +564,7 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                                 borderRadius: BorderRadius.circular(27),
                                 color: AppColors.primaryColor,
                               ),
-                              // decoration: BoxDecoration(
-                              //   color: selectedColor == Colors.white
-                              //       ? Colors.black
-                              //       : selectedColor == Colors.red
-                              //           ? Colors.red
-                              //           : selectedColor == Colors.blue
-                              //               ? Colors.blue
-                              //               : Colors.purple.shade200,
-                              //   shape: BoxShape.circle,
-                              // ),
+
                               child: SvgPicture.asset(
                                 "assets/svg/colorfilter.svg",
                                 height: 20,
@@ -639,14 +608,18 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                                       .setCustomColor(Colors.black);
                                 }
                               });
+
                               setState(() {
                                 _drawingController
                                     .setPaintContent(SimpleLine());
+
+                                _drawingController.setStyle(strokeWidth: 5.0);
+
+                                sliderValue = 5.0;
                               });
                             },
                           ),
                         ),
-
                         const Text(
                           "Pen",
                           style: TextStyle(
@@ -692,38 +665,42 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                 ],
               ),
             ),
-            Expanded(
+            Flexible(
               child: Stack(
                 children: [
-                  DrawingBoard(
-                    // maxScale: 20.0,
-                    // minScale: 0.2,
-                    // colorValue: Colors.green,
-                    controller: _drawingController,
-                    background: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      // width: constraints.maxWidth,
-                      // height: constraints.maxHeight,
-                      color: Colors.white,
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanStart: (_) {},
+                    onPanCancel: () {},
+                    dragStartBehavior: DragStartBehavior.down,
+                    child: DrawingBoard(
+                      controller: _drawingController,
+                      background: Container(
+                        // width: 200,
+                        // height: 200,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        // width: constraints.maxWidth,
+                        // height: constraints.maxHeight,
+                        // color: Colors.green,
+                      ),
+                      // defaultToolsBuilder: (Type t, _) {
+                      //   return DrawingBoard.defaultTools(t, _drawingController)
+                      //     ..insert(
+                      //       1,
+                      //       DefToolItem(
+                      //         icon: Icons.change_history_rounded,
+                      //         isActive: t == Triangle,
+                      //       ),
+                      //     );
+                      // },
                     ),
-
-                    defaultToolsBuilder: (Type t, _) {
-                      return DrawingBoard.defaultTools(t, _drawingController)
-                        ..insert(
-                          1,
-                          DefToolItem(
-                            icon: Icons.change_history_rounded,
-                            isActive: t == Triangle,
-                          ),
-                        );
-                    },
                   ),
                   Positioned(
                     top: 20,
                     right: 10,
                     child: SizedBox(
-                      height: 300,
+                      height: 200,
                       width: 24,
                       child: ExValueBuilder<DrawConfig>(
                         valueListenable: _drawingController.drawConfig,
@@ -731,15 +708,17 @@ class _DrawingRoomScreenState extends State<DrawingRoomScreen> {
                             p.strokeWidth != n.strokeWidth,
                         builder: (_, DrawConfig dc, ___) {
                           return RotatedBox(
-                            quarterTurns:
-                                3, // Rotate the Slider 270 degrees (3 quarter-turns) for vertical orientation
+                            quarterTurns: 3,
                             child: Slider(
-                              value: dc.strokeWidth,
-                              max: 50,
-                              min: 1,
-                              onChanged: (double v) =>
-                                  _drawingController.setStyle(strokeWidth: v),
-                            ),
+                                value: dc.strokeWidth,
+                                max: 50,
+                                min: 1,
+                                onChanged: (double v) {
+                                  sliderValue = v;
+                                  print("==>>${v}");
+                                  _drawingController.setStyle(
+                                      strokeWidth: sliderValue);
+                                }),
                           );
                         },
                       ),

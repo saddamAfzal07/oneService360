@@ -171,32 +171,6 @@ class _ImageRoomScreenState extends State<ImageRoomScreen> {
     }
   }
 
-  /// 获取画板内容 Json `getJsonList()`
-
-  /// 添加Json测试内容
-  // void _addTestLine() {
-  //   _drawingController.addContent(StraightLine.fromJson(_testLine1));
-  //   _drawingController
-  //       .addContents(<PaintContent>[StraightLine.fromJson(_testLine2)]);
-
-  //   _drawingController.addContent(SimpleLine.fromJson(tData[0]));
-  //   _drawingController.addContent(Eraser.fromJson(tData[1]));
-  // }
-
-  // List<Map<String, dynamic>> getDrawingData() {
-  //   print("==>>Enter into getDrawingData");
-  //   final List<Map<String, dynamic>> drawingData =
-  //       _drawingController.getJsonList();
-  //   return drawingData;
-  // }
-
-  // Future<void> sendDrawingDataToServer(
-  //     List<Map<String, dynamic>> drawingData) async {
-  //   final String jsonData = jsonEncode(drawingData);
-
-  //   log("Json Data==>>${jsonData}");
-  // }
-
   bool isLoading = true;
   @override
   void initState() {
@@ -264,17 +238,10 @@ class _ImageRoomScreenState extends State<ImageRoomScreen> {
             child: Stack(
               children: [
                 DrawingBoard(
-                  // boardPanEnabled: false,
-                  // colorValue: Colors.green,
                   controller: _drawingController,
-
                   background: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height,
-                    // height: 500,
-                    // width: 500,
-                    // width: constraints.maxWidth,
-                    // height: constraints.maxHeight,
                     color: Colors.white,
                     clipBehavior: Clip.none,
                   ),

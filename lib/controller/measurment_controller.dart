@@ -34,18 +34,24 @@ class MeasurementController extends ChangeNotifier {
     final response = await http.get(
       Uri.parse("${AppUrl.baseurl}v1/get/measurements?tailor_id=1}"),
     );
-
+    log("Response${response.body}");
     if (response.statusCode == 200) {
+      log("Enter into 200 ");
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
       if (response.statusCode == 200) {
+        log("Enter into 200 Data ");
         final List<dynamic> jsonList = jsonResponse["data"];
         // print("Response body==>>${response.body}");
         return jsonList.map((json) => Measurement.fromJson(json)).toList();
       } else {
+        log("Else Response Failed to fetch products ");
+
         throw Exception('Failed to fetch products');
       }
     } else {
+      log("Response Failed to fetch products ");
+
       throw Exception('Failed to fetch products');
     }
   }

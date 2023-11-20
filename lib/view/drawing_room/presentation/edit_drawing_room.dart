@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
@@ -297,6 +298,9 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
 //
   List availableColors = ['black', 'red', 'blue', 'green'];
   Color selectedColor = Colors.black;
+
+  //Slider
+  double sliderValue = 20.0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -389,6 +393,10 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                   onTap: () {
                     _drawingController.setPaintContent(SimpleLine());
                     _drawingController.setCustomColor(Colors.white);
+                    _drawingController.setStyle(strokeWidth: 25.0);
+
+                    sliderValue = 25.0;
+                    setState(() {});
                   },
                   child: Column(
                     children: [
@@ -593,6 +601,9 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                             });
                             setState(() {
                               _drawingController.setPaintContent(SimpleLine());
+                              _drawingController.setStyle(strokeWidth: 5.0);
+
+                              sliderValue = 5.0;
                             });
                           },
                         ),
@@ -660,56 +671,49 @@ class _EditDrawingRoomScreenState extends State<EditDrawingRoomScreen> {
                       //       (BuildContext context, BoxConstraints constraints) {
                       //     return
 
-                      DrawingBoard(
-                        // colorValue: Colors.green,
-                        controller: _drawingController,
-                        background: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          // width: constraints.maxWidth,
-                          // height: constraints.maxHeight,
-                          color: Colors.white,
-                          clipBehavior: Clip.none,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onPanStart: (_) {},
+                        onPanCancel: () {},
+                        dragStartBehavior: DragStartBehavior.down,
+                        child: DrawingBoard(
+                          // colorValue: Colors.green,
+                          controller: _drawingController,
+                          background: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            // width: constraints.maxWidth,
+                            // height: constraints.maxHeight,
+                            color: Colors.white,
+                            clipBehavior: Clip.none,
+                          ),
                         ),
-                        // showDefaultActions: true,
-                        // showDefaultTools: true,
-                        // defaultToolsBuilder: (Type t, _) {
-                        //   return DrawingBoard.defaultTools(
-                        //       t, _drawingController)
-                        //     ..insert(
-                        //       1,
-                        //       DefToolItem(
-                        //         icon: Icons.change_history_rounded,
-                        //         isActive: t == Triangle,
-                        //       ),
-                        //     );
-                        // },
                       ),
                       //   },
                       // ),
                       Positioned(
-                        top: 20,
+                        top: 30,
                         right: 10,
                         child: SizedBox(
-                          height:
-                              300, // Set the height to adjust the length of the vertical slider
-                          width:
-                              24, // Set the width to adjust the thickness of the vertical slider
+                          height: 200,
+                          width: 24,
                           child: ExValueBuilder<DrawConfig>(
                             valueListenable: _drawingController.drawConfig,
                             shouldRebuild: (DrawConfig p, DrawConfig n) =>
                                 p.strokeWidth != n.strokeWidth,
                             builder: (_, DrawConfig dc, ___) {
                               return RotatedBox(
-                                quarterTurns:
-                                    3, // Rotate the Slider 270 degrees (3 quarter-turns) for vertical orientation
+                                quarterTurns: 3,
                                 child: Slider(
-                                  value: dc.strokeWidth,
-                                  max: 50,
-                                  min: 1,
-                                  onChanged: (double v) => _drawingController
-                                      .setStyle(strokeWidth: v),
-                                ),
+                                    value: dc.strokeWidth,
+                                    max: 50,
+                                    min: 1,
+                                    onChanged: (double v) {
+                                      sliderValue = v;
+                                      print("==>>${v}");
+                                      _drawingController.setStyle(
+                                          strokeWidth: sliderValue);
+                                    }),
                               );
                             },
                           ),
